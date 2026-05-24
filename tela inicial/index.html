@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SIGEO-PS | Projetos Sociais</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <nav class="nav" aria-label="Navegacao principal">
+        <a class="brand" href="#">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" role="img">
+              <path d="M4 19V8.5L12 4l8 4.5V19h-5v-6H9v6H4Zm7-8h2V8h-2v3Z" />
+            </svg>
+          </span>
+          <span>SIGEO-PS</span>
+        </a>
+
+        <div class="nav-links">
+          <a href="#mapa">Explorar</a>
+          <a href="#categorias">Categorias</a>
+          <a href="#eventos">Eventos</a>
+          <a href="#sobre">Sobre</a>
+        </div>
+
+        <div class="nav-actions">
+          <a class="login-link" href="#">Entrar</a>
+          <a class="btn btn-primary btn-small" href="#">Cadastrar projeto</a>
+        </div>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="hero-inner">
+          <h1>Conecte-se com Impacto Social Perto de Você</h1>
+          <p>
+            Descubra e participe de projetos sociais relevantes na sua comunidade.
+            Faça a diferença onde ela mais importa.
+          </p>
+
+          <form class="search" id="searchForm" aria-label="Buscar projetos sociais">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M10.8 18a7.2 7.2 0 1 1 5.1-12.3 7.2 7.2 0 0 1 0 10.2l4.1 4.1-1.5 1.5-4.1-4.1A7.1 7.1 0 0 1 10.8 18Zm0-2.2a5 5 0 1 0 0-10 5 5 0 0 0 0 10Z" />
+            </svg>
+            <input id="searchInput" type="search" placeholder="Encontre projetos sociais perto de voce..." />
+          </form>
+
+          <div class="hero-actions">
+            <a class="btn btn-light" href="#mapa">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 19-6-2.1-4 1.6V6l4-1.6 6 2.1 4-1.6v12.5L15 19Zm-5.2-4 4.4 1.5V8.4L9.8 6.9V15Z" /></svg>
+              Explorar mapa
+            </a>
+            <a class="btn btn-blue" href="#">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 13H5v-2h6V5h2v6h6v2h-6v6h-2v-6Z" /></svg>
+              Cadastrar projeto
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <section class="map-section" id="mapa">
+        <div class="section-heading centered">
+          <h2>Mapa Interativo de Projetos</h2>
+          <p>Veja iniciativas de impacto social acontecendo ao seu redor</p>
+        </div>
+
+        <div class="map-wrap">
+          <aside class="map-panel" aria-label="Resumo dos projetos">
+            <div class="stats-row">
+              <span><strong>1.247</strong> ativos</span>
+              <span><strong>86</strong> comunidades</span>
+            </div>
+            <div class="project-mini">
+              <span class="avatar" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Zm0 2c-4.4 0-7 2.2-7 4.2V20h14v-1.8c0-2-2.6-4.2-7-4.2Z" /></svg>
+              </span>
+              <div>
+                <strong>Projeto em destaque</strong>
+                <p>Rede de apoio comunitario</p>
+              </div>
+            </div>
+            <ul class="map-list">
+              <li>Saude e bem-estar</li>
+              <li>Educacao e tecnologia</li>
+              <li>Seguranca alimentar</li>
+            </ul>
+          </aside>
+
+          <div class="map-card" aria-label="Mapa ilustrativo com marcadores">
+            <div class="water"></div>
+            <div class="land"></div>
+            <span class="city city-one">Centro</span>
+            <span class="city city-two">Norte</span>
+            <span class="city city-three">Leste</span>
+            <button class="pin green pin-one" data-project="Mutirao de saude" aria-label="Mutirao de saude"></button>
+            <button class="pin green pin-two" data-project="Biblioteca comunitaria" aria-label="Biblioteca comunitaria"></button>
+            <button class="pin yellow pin-three" data-project="Banco de alimentos" aria-label="Banco de alimentos"></button>
+            <button class="pin pink pin-four" data-project="Capacitacao profissional" aria-label="Capacitacao profissional"></button>
+            <button class="pin green pin-five" data-project="Moradia digna" aria-label="Moradia digna"></button>
+            <button class="pin blue pin-six" data-project="Coleta solidaria" aria-label="Coleta solidaria"></button>
+            <div class="map-toast" id="mapToast">Selecione um projeto no mapa</div>
+            <a class="full-map" href="#">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5h6v2H8.4l3.8 3.8-1.4 1.4L7 8.4V11H5V5Zm8 0h6v6h-2V8.4l-3.8 3.8-1.4-1.4L15.6 7H13V5ZM5 13h2v2.6l3.8-3.8 1.4 1.4L8.4 17H11v2H5v-6Zm12 0h2v6h-6v-2h2.6l-3.8-3.8 1.4-1.4 3.8 3.8V13Z" /></svg>
+              Ver mapa completo
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <section class="categories-section" id="categorias">
+        <div class="section-heading centered">
+          <h2>Categorias de Impacto Social</h2>
+          <p>Escolha a causa que mais importa para voce</p>
+        </div>
+
+        <div class="category-grid">
+          <article class="category-card">
+            <span class="category-icon red">
+              <svg viewBox="0 0 24 24"><path d="M12 21s-7-4.4-7-10a4.2 4.2 0 0 1 7-3.1A4.2 4.2 0 0 1 19 11c0 5.6-7 10-7 10Zm-4-9h2.3l.9-2.3 2 4.8 1-2.5H16v-2h-3.1l-.7 1.7-2-4.8L9 10H8v2Z" /></svg>
+            </span>
+            <h3>Saude</h3>
+            <p>Atendimento medico e bem-estar</p>
+          </article>
+
+          <article class="category-card">
+            <span class="category-icon blue">
+              <svg viewBox="0 0 24 24"><path d="m12 4 9 5-9 5-9-5 9-5Zm-6 8.2 2 1.1V17c0 1.6 3 3 4 3s4-1.4 4-3v-3.7l2-1.1V17h2v-6l-8 4.4-8-4.4v6h2v-4.8Z" /></svg>
+            </span>
+            <h3>Educacao</h3>
+            <p>Aprendizagem e alfabetizacao</p>
+          </article>
+
+          <article class="category-card">
+            <span class="category-icon orange">
+              <svg viewBox="0 0 24 24"><path d="M7 3h2v8a3 3 0 0 1-2 2.8V21H5v-7.2A3 3 0 0 1 3 11V3h2v7h1V3h1v7h1V3Zm9 0c2.2 0 4 1.8 4 4v5h-3v9h-2V3h1Z" /></svg>
+            </span>
+            <h3>Alimentacao</h3>
+            <p>Combate a fome e nutricao</p>
+          </article>
+
+          <article class="category-card">
+            <span class="category-icon purple">
+              <svg viewBox="0 0 24 24"><path d="M9 5V3h6v2h4a2 2 0 0 1 2 2v4h-7v-2h-4v2H3V7a2 2 0 0 1 2-2h4Zm2 0h2V4h-2v1ZM3 13h7v2h4v-2h7v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-5Z" /></svg>
+            </span>
+            <h3>Emprego</h3>
+            <p>Capacitacao e oportunidades</p>
+          </article>
+
+          <article class="category-card">
+            <span class="category-icon green">
+              <svg viewBox="0 0 24 24"><path d="m12 3 9 8h-3v9h-5v-6h-2v6H6v-9H3l9-8Z" /></svg>
+            </span>
+            <h3>Moradia</h3>
+            <p>Abrigo e infraestrutura</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="events-section" id="eventos">
+        <div class="events-head">
+          <div class="section-heading">
+            <h2>Eventos Sociais em Destaque</h2>
+            <p>Participe das proximas acoes na sua regiao</p>
+          </div>
+          <a href="#">Ver todos os eventos</a>
+        </div>
+
+        <div class="event-grid">
+          <article class="event-card">
+            <div class="event-image image-health"></div>
+            <div class="event-body">
+              <div class="event-meta"><span>Saude</span><small>2,3 km</small></div>
+              <h3>Feira Comunitaria de Saude</h3>
+              <p>Exames basicos gratuitos e oficinas de bem-estar para familias locais.</p>
+              <a class="btn btn-primary btn-wide" href="#">Participar</a>
+            </div>
+          </article>
+
+          <article class="event-card">
+            <div class="event-image image-education"></div>
+            <div class="event-body">
+              <div class="event-meta"><span>Educacao</span><small>1,8 km</small></div>
+              <h3>Oficina de Letramento Digital</h3>
+              <p>Ensino de seguranca digital, internet e ferramentas essenciais.</p>
+              <a class="btn btn-primary btn-wide" href="#">Participar</a>
+            </div>
+          </article>
+
+          <article class="event-card">
+            <div class="event-image image-food"></div>
+            <div class="event-body">
+              <div class="event-meta"><span>Alimentacao</span><small>3,3 km</small></div>
+              <h3>Campanha de Arrecadacao</h3>
+              <p>Coleta e distribuicao de alimentos para familias em vulnerabilidade.</p>
+              <a class="btn btn-primary btn-wide" href="#">Participar</a>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="cta" id="sobre">
+        <div class="cta-inner">
+          <h2>Pronto para Fazer a Diferenca?</h2>
+          <p>Junte-se a voluntarios e organizacoes que fortalecem comunidades todos os dias.</p>
+          <div class="cta-actions">
+            <a class="btn btn-light" href="#mapa">Encontrar projetos</a>
+            <a class="btn btn-dark-green" href="#">Criar novo projeto</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-grid">
+        <div>
+          <a class="brand footer-brand" href="#">
+            <span class="brand-mark" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M4 19V8.5L12 4l8 4.5V19h-5v-6H9v6H4Zm7-8h2V8h-2v3Z" /></svg>
+            </span>
+            <span>SIGEO-PS</span>
+          </a>
+          <p>Conectando comunidades por tecnologia para criar impacto social real.</p>
+        </div>
+
+        <div>
+          <h3>Plataforma</h3>
+          <a href="#mapa">Explorar projetos</a>
+          <a href="#">Criar projeto</a>
+          <a href="#">Entrar na comunidade</a>
+        </div>
+
+        <div>
+          <h3>Suporte</h3>
+          <a href="#">Central de ajuda</a>
+          <a href="#">Contato</a>
+          <a href="#">Privacidade</a>
+        </div>
+      </div>
+
+      <p class="copyright">© 2026 SIGEO-PS. Todos os direitos reservados.</p>
+    </footer>
+
+    <script src="app.js"></script>
+  </body>
+</html>
