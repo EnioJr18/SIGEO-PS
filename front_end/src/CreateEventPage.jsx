@@ -1,4 +1,5 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
+import AddressAutocomplete from './AddressAutocomplete.jsx'
 import './App.css'
 
 function CreateEventPage({
@@ -9,55 +10,6 @@ function CreateEventPage({
   createSuccess,
 }) {
   const [address, setAddress] = useState('')
-  const [geoStatus, setGeoStatus] = useState('')
-
-  const useMyLocation = () => {
-    setGeoStatus('Obtendo localizacao...')
-    if (!navigator.geolocation) {
-      setGeoStatus('Geolocalizacao nao suportada pelo navegador.')
-      return
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const lat = String(pos.coords.latitude)
-        const lon = String(pos.coords.longitude)
-        onFormChange({ target: { name: 'latitude', value: lat } })
-        onFormChange({ target: { name: 'longitude', value: lon } })
-        setGeoStatus('Localizacao atual definida')
-      },
-      (err) => {
-        setGeoStatus('Erro ao obter localizacao: ' + (err.message || 'desconhecido'))
-      },
-      { enableHighAccuracy: true, timeout: 10000 }
-    )
-  }
-
-  const geocodeAddress = async () => {
-    const q = address.trim()
-    if (!q) {
-      setGeoStatus('Digite um endereco para buscar.')
-      return
-    }
-
-    setGeoStatus('Buscando endereco...')
-    try {
-      const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=1`
-      const res = await fetch(url, { headers: { 'Accept-Language': 'pt-BR' } })
-      const data = await res.json()
-
-      if (Array.isArray(data) && data.length > 0) {
-        const item = data[0]
-        onFormChange({ target: { name: 'latitude', value: String(item.lat) } })
-        onFormChange({ target: { name: 'longitude', value: String(item.lon) } })
-        setGeoStatus('Endereco encontrado e coordenadas preenchidas')
-      } else {
-        setGeoStatus('Endereco nao encontrado')
-      }
-    } catch (e) {
-      setGeoStatus('Erro ao buscar endereco')
-    }
-  }
   return (
     <>
       <header className="site-header">
@@ -72,7 +24,7 @@ function CreateEventPage({
           </a>
 
           <div className="nav-links">
-            <a href="/">Inicio</a>
+            <a href="/">Início</a>
             <a href="/#eventos">Eventos</a>
             <a href="/#mapa">Mapa</a>
           </div>
@@ -90,8 +42,8 @@ function CreateEventPage({
           <div className="cta-inner">
             <h2>Cadastrar Evento</h2>
             <p>
-              Publique um novo evento social no mapa com titulo, descricao, categoria,
-              vagas, data e coordenadas.
+              Publique um novo evento social no mapa com título, descrição, categoria,
+              vagas, data e endereço.
             </p>
             <div className="cta-actions">
               <a className="btn btn-light" href="/#eventos">
@@ -106,30 +58,16 @@ function CreateEventPage({
 
         <section className="create-event-section create-event-page" id="cadastrar-evento">
           <div className="create-event-grid">
-            <aside className="create-event-panel">
-              <span className="create-event-badge">Novo evento</span>
-              <h3>Organize uma acao com impacto real</h3>
-              <p>
-                O formulario envia titulo, descricao, categoria, vagas, data e coordenadas.
-                O organizador eh associado ao usuario autenticado.
-              </p>
-              <ul>
-                <li>Use coordenadas de latitude e longitude</li>
-                <li>O sistema salva a localizacao no PostGIS</li>
-                <li>Seu evento aparece no mapa depois do cadastro</li>
-              </ul>
-            </aside>
-
             <form className="event-form" onSubmit={onSubmit}>
               <div className="form-grid">
                 <label>
-                  <span>Titulo</span>
+                  <span>Título</span>
                   <input
                     name="titulo"
                     type="text"
                     value={eventForm.titulo}
                     onChange={onFormChange}
-                    placeholder="Feira de Saude Comunitaria"
+                    placeholder="Feira de Saúde Comunitária"
                     required
                   />
                 </label>
@@ -137,23 +75,23 @@ function CreateEventPage({
                 <label>
                   <span>Categoria</span>
                   <select name="categoria" value={eventForm.categoria} onChange={onFormChange} required>
-                    <option value="saude">Saude</option>
-                    <option value="educacao">Educacao</option>
+                    <option value="saude">Saúde</option>
+                    <option value="educacao">Educação</option>
                     <option value="cultura">Cultura</option>
                     <option value="esporte">Esporte</option>
-                    <option value="assistencia_social">Assistencia Social</option>
+                    <option value="assistencia_social">Assistência Social</option>
                     <option value="meio_ambiente">Meio Ambiente</option>
                     <option value="outro">Outro</option>
                   </select>
                 </label>
 
                 <label className="form-span-2">
-                  <span>Descricao</span>
+                  <span>Descrição</span>
                   <textarea
                     name="descricao"
                     value={eventForm.descricao}
                     onChange={onFormChange}
-                    placeholder="Descreva o objetivo, publico e o que sera oferecido no evento."
+                    placeholder="Descreva o objetivo, público e o que será oferecido no evento."
                     rows="5"
                     required
                   ></textarea>
@@ -184,44 +122,8 @@ function CreateEventPage({
                 </label>
 
                 <label className="form-span-2">
-                  <span>Endereco (opcional)</span>
-                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                    <input
-                      type="text"
-                      placeholder="Rua, Bairro, Cidade, Estado"
-                      value={address}
-                      onChange={(e) => setAddress(e.target.value)}
-                    />
-                    <button type="button" className="btn" onClick={geocodeAddress}>
-                      Buscar endereco
-                    </button>
-                    <button type="button" className="btn" onClick={useMyLocation}>
-                      Usar minha localizacao
-                    </button>
-                  </div>
-                  {geoStatus && <small className="form-note">{geoStatus}</small>}
-                </label>
-
-                <label>
-                  <span>Latitude</span>
-                  <input
-                    name="latitude"
-                    type="text"
-                    value={eventForm.latitude}
-                    onChange={onFormChange}
-                    required
-                  />
-                </label>
-
-                <label>
-                  <span>Longitude</span>
-                  <input
-                    name="longitude"
-                    type="text"
-                    value={eventForm.longitude}
-                    onChange={onFormChange}
-                    required
-                  />
+                  <span>Endereço</span>
+                  <AddressAutocomplete value={address} onChange={setAddress} />
                 </label>
               </div>
 

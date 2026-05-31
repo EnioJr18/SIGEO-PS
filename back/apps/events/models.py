@@ -18,6 +18,8 @@ class EventoSocial(models.Model):
     titulo = models.CharField(max_length=200)
     descricao = models.TextField()
 
+    endereco = models.CharField(max_length=255, blank=True)
+
     categoria = models.CharField(max_length=50, choices=CATEGORIA_CHOICES, default='outro')
 
     vagas = models.PositiveIntegerField()

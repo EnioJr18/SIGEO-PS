@@ -26,16 +26,8 @@ async function request(path, options = {}) {
   });
 
   if (!response.ok) {
-    let details = 'Erro ao processar requisicao.';
-
-    try {
-      const data = await response.json();
-      details = formatApiError(data);
-    } catch {
-      details = formatHttpError(response);
-    }
-
-    throw new Error(details);
+    const details = await readErrorDetails(response)
+    throw new Error(normalizeErrorMessage(details, response))
   }
 
   if (response.status === 204) {
@@ -46,20 +38,77 @@ async function request(path, options = {}) {
 }
 
 function formatHttpError(response) {
-  if (response.status === 502 || response.status === 504) {
-    return 'Servidor indisponivel. Verifique se o backend Django e o banco PostgreSQL estao rodando.';
+  if (response.status === 400) {
+    return 'Requisição inválida. Verifique os campos enviados.';
   }
 
-  return response.statusText || 'Erro ao processar requisicao.';
+  if (response.status === 401) {
+    return 'Você precisa entrar para continuar.';
+  }
+
+  if (response.status === 403) {
+    return 'Você não tem permissão para realizar esta ação.';
+  }
+
+  if (response.status === 404) {
+    return 'O recurso solicitado não foi encontrado.';
+  }
+
+  if (response.status === 502 || response.status === 504) {
+    return 'Servidor indisponível. Verifique se o backend Django e o banco PostgreSQL estão rodando.';
+  }
+
+  if (response.status === 500) {
+    return 'Erro interno no servidor. Tente novamente em instantes.';
+  }
+
+  return 'Erro ao processar requisição.';
+}
+
+async function readErrorDetails(response) {
+  const contentType = response.headers.get('content-type') || ''
+
+  if (contentType.includes('application/json')) {
+    try {
+      const data = await response.json()
+      const formatted = formatApiError(data)
+      if (formatted) {
+        return formatted
+      }
+    } catch {
+      return formatHttpError(response)
+    }
+  }
+
+  try {
+    const text = await response.text()
+    if (text.trim()) {
+      return text.trim()
+    }
+  } catch {
+    return formatHttpError(response)
+  }
+
+  return formatHttpError(response)
+}
+
+function normalizeErrorMessage(message, response) {
+  const normalized = String(message || '').trim()
+
+  if (!normalized || normalized === 'Bad Request') {
+    return formatHttpError(response)
+  }
+
+  return normalized
 }
 
 function formatApiError(data) {
   if (!data || typeof data !== 'object') {
-    return 'Erro ao processar requisicao.';
+    return '';
   }
 
   if (data.detail) {
-    return String(data.detail);
+    return String(data.detail)
   }
 
   return Object.entries(data)
@@ -67,7 +116,7 @@ function formatApiError(data) {
       const text = Array.isArray(messages) ? messages.join(' ') : String(messages);
       return `${field}: ${text}`;
     })
-    .join(' ');
+    .join(' ')
 }
 
 export async function listEventos({ search = '', categoria = '' } = {}) {

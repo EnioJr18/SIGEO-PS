@@ -53,10 +53,10 @@ function RegisterPage({ onSubmit, registerError, registerSuccess }) {
             </p>
           </div>
 
-          <div className="login-highlights" aria-label="Beneficios do cadastro">
-            <span>Participacao em eventos</span>
+          <div className="login-highlights" aria-label="Benefícios do cadastro">
+            <span>Participação em eventos</span>
             <span>Projetos no mapa</span>
-            <span>Perfil comunitario</span>
+            <span>Perfil comunitário</span>
           </div>
         </div>
 
@@ -67,7 +67,7 @@ function RegisterPage({ onSubmit, registerError, registerSuccess }) {
           </div>
 
           <label>
-            <span>Usuario</span>
+            <span>Usuário</span>
             <input
               name="username"
               type="text"
@@ -136,8 +136,8 @@ function RegisterPage({ onSubmit, registerError, registerSuccess }) {
           </button>
 
           <div className="login-card-links">
-            <a href="/login">Ja tenho conta</a>
-            <a href="/">Voltar para inicio</a>
+            <a href="/login">Já tenho conta</a>
+            <a href="/">Voltar para início</a>
           </div>
         </form>
       </section>

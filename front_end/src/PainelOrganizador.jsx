@@ -2,15 +2,13 @@ import { useState, useEffect } from 'react';
 import { getInscricoesRecebidas } from './api';
 
 export default function PainelOrganizador({ eventos }) {
-  const [inscricoes, setInscricoes] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [inscricoes, setInscricoes] = useState(null);
 
   // Verifica se tem token. Se não tiver, nem tenta carregar o painel.
   const isAuthenticated = !!localStorage.getItem('accessToken') || !!localStorage.getItem('token');
 
   useEffect(() => {
     if (!isAuthenticated) {
-      setLoading(false);
       return;
     }
 
@@ -21,11 +19,10 @@ export default function PainelOrganizador({ eventos }) {
       .catch(() => {
         // Ignora o erro silenciosamente no MVP para não assustar o usuário
         setInscricoes([]);
-      })
-      .finally(() => setLoading(false));
+      });
   }, [isAuthenticated]);
 
-  if (loading || !isAuthenticated || inscricoes.length === 0) {
+  if (!isAuthenticated || inscricoes === null || inscricoes.length === 0) {
     return null; // Não renderiza nada se não for organizador ou não tiver inscrições
   }
 

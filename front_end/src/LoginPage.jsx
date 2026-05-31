@@ -32,7 +32,7 @@ function LoginPage({ onSubmit, loginError, loginSuccess }) {
 
           <div className="login-copy-content">
             <span className="login-kicker">Impacto social conectado</span>
-            <h1>Entre para acompanhar projetos perto de voce</h1>
+            <h1>Entre para acompanhar projetos perto de você</h1>
             <p>
               Acesse sua conta para participar de eventos, cadastrar iniciativas e
               fortalecer a rede de apoio da sua comunidade.
@@ -53,12 +53,12 @@ function LoginPage({ onSubmit, loginError, loginSuccess }) {
           </div>
 
           <label>
-            <span>E-mail ou usuario</span>
+            <span>E-mail ou usuário</span>
             <input
               type="text"
               value={identifier}
               onChange={(event) => setIdentifier(event.target.value)}
-              placeholder="seu.usuario"
+                placeholder="você@email.com"
               autoComplete="username"
               required
             />
@@ -84,7 +84,7 @@ function LoginPage({ onSubmit, loginError, loginSuccess }) {
           </button>
 
           <div className="login-card-links">
-            <a href="/">Voltar para inicio</a>
+            <a href="/">Voltar para início</a>
             <a href="/cadastro">Criar conta</a>
           </div>
         </form>
