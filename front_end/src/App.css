@@ -1,9 +1,4 @@
 :root {
-  --green: #10b981;
-  --green-dark: #059669;
-  --blue: #3b82f6;
-  --ink: #111827;
-  :root {
     --green: #10b981;
     --green-dark: #059669;
     --blue: #3b82f6;
@@ -818,6 +813,8 @@
       gap: 28px;
     }
   }
+
+.search {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -1588,9 +1585,221 @@
   flex-wrap: wrap;
 }
 
+.login-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 32px;
+  background:
+    linear-gradient(135deg, rgba(16, 185, 129, 0.92), rgba(59, 130, 246, 0.86)),
+    url("./assets/hero.png") center/cover;
+}
+
+.login-shell {
+  width: min(1080px, 100%);
+  min-height: 640px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(360px, 0.75fr);
+  overflow: hidden;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 28px 70px rgba(15, 23, 42, 0.24);
+}
+
+.login-copy {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 48px;
+  padding: 42px;
+  color: white;
+  background:
+    linear-gradient(135deg, rgba(15, 23, 42, 0.76), rgba(5, 150, 105, 0.78)),
+    url("./assets/hero.png") center/cover;
+}
+
+.login-brand {
+  color: white;
+}
+
+.login-copy-content {
+  max-width: 560px;
+}
+
+.login-kicker {
+  display: inline-flex;
+  margin-bottom: 18px;
+  padding: 8px 12px;
+  border-radius: 7px;
+  color: #dcfce7;
+  background: rgba(255, 255, 255, 0.14);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.login-copy h1 {
+  margin: 0;
+  font-size: clamp(2.25rem, 5vw, 4.1rem);
+  line-height: 1;
+  letter-spacing: 0;
+}
+
+.login-copy p {
+  max-width: 500px;
+  margin: 22px 0 0;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 17px;
+  line-height: 1.65;
+}
+
+.login-highlights {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.login-highlights span {
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.12);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.login-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 18px;
+  padding: 46px;
+  background: #ffffff;
+}
+
+.login-card-head span {
+  color: var(--green-dark);
+  font-size: 13px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.login-card-head h2 {
+  margin: 8px 0 8px;
+  color: var(--ink);
+  font-size: 2rem;
+  line-height: 1.1;
+}
+
+.login-card label {
+  display: grid;
+  gap: 8px;
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.login-card input {
+  width: 100%;
+  min-height: 48px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  color: var(--ink);
+  background: #fff;
+  font: inherit;
+  padding: 0 14px;
+  outline: none;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.login-card select {
+  width: 100%;
+  min-height: 48px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  color: var(--ink);
+  background: #fff;
+  font: inherit;
+  padding: 0 14px;
+  outline: none;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.login-card input:focus {
+  border-color: var(--green);
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.12);
+}
+
+.login-card select:focus {
+  border-color: var(--green);
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.12);
+}
+
+.login-card .btn:disabled {
+  cursor: wait;
+  opacity: 0.74;
+  transform: none;
+}
+
+.login-card-links {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  color: #475569;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.login-card-links a:hover {
+  color: var(--green-dark);
+}
+
+.register-page {
+  background:
+    linear-gradient(135deg, rgba(59, 130, 246, 0.84), rgba(16, 185, 129, 0.92)),
+    url("./assets/hero.png") center/cover;
+}
+
+.register-shell {
+  grid-template-columns: minmax(360px, 0.82fr) minmax(0, 1fr);
+}
+
+.register-copy {
+  order: 2;
+  background:
+    linear-gradient(135deg, rgba(5, 150, 105, 0.8), rgba(15, 23, 42, 0.76)),
+    url("./assets/hero.png") center/cover;
+}
+
+.register-card {
+  order: 1;
+}
+
 @media (max-width: 900px) {
   .create-event-grid {
     grid-template-columns: 1fr;
+  }
+
+  .login-page {
+    padding: 18px;
+  }
+
+  .login-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .login-copy {
+    min-height: 360px;
+    padding: 28px;
+  }
+
+  .login-card {
+    padding: 30px;
+  }
+
+  .register-copy,
+  .register-card {
+    order: initial;
   }
 
   .form-grid {
@@ -1599,5 +1808,35 @@
 
   .form-span-2 {
     grid-column: auto;
+  }
+}
+
+@media (max-width: 640px) {
+  .login-page {
+    padding: 0;
+    background: #ffffff;
+  }
+
+  .login-shell {
+    min-height: 100vh;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .login-copy {
+    min-height: 330px;
+    padding: 22px;
+  }
+
+  .login-copy h1 {
+    font-size: 2.25rem;
+  }
+
+  .login-card {
+    padding: 24px;
+  }
+
+  .login-card-links {
+    flex-direction: column;
   }
 }

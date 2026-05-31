@@ -1,6 +1,6 @@
 from django.urls import path
 from .views import EventoSocialListCreateView, EventoSocialDetailView, InscreverEventoView
-from . import views
+from apps.events import views
 
 urlpatterns = [
     path('', EventoSocialListCreateView.as_view(), name='evento-list-create'),

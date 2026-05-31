@@ -1,4 +1,4 @@
-const API_BASE = '/api';
+const API_BASE = 'http://127.0.0.1:8000/api';
 
 function getAuthToken() {
   return (
@@ -30,9 +30,9 @@ async function request(path, options = {}) {
 
     try {
       const data = await response.json();
-      details = JSON.stringify(data);
+      details = formatApiError(data);
     } catch {
-      details = response.statusText || details;
+      details = formatHttpError(response);
     }
 
     throw new Error(details);
@@ -43,6 +43,31 @@ async function request(path, options = {}) {
   }
 
   return response.json();
+}
+
+function formatHttpError(response) {
+  if (response.status === 502 || response.status === 504) {
+    return 'Servidor indisponivel. Verifique se o backend Django e o banco PostgreSQL estao rodando.';
+  }
+
+  return response.statusText || 'Erro ao processar requisicao.';
+}
+
+function formatApiError(data) {
+  if (!data || typeof data !== 'object') {
+    return 'Erro ao processar requisicao.';
+  }
+
+  if (data.detail) {
+    return String(data.detail);
+  }
+
+  return Object.entries(data)
+    .map(([field, messages]) => {
+      const text = Array.isArray(messages) ? messages.join(' ') : String(messages);
+      return `${field}: ${text}`;
+    })
+    .join(' ');
 }
 
 export async function listEventos({ search = '', categoria = '' } = {}) {
@@ -90,4 +115,8 @@ export async function loginUser(payload) {
 
 export async function getProfile() {
   return request('/users/me/');
+}
+
+export async function getInscricoesRecebidas() {
+  return request('/eventos/inscricoes-recebidas/');
 }

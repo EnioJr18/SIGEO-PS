@@ -4,7 +4,7 @@ from django.core.management.base import BaseCommand
 from django.utils import timezone
 from django.contrib.gis.geos import Point
 from django.contrib.auth import get_user_model
-from apps.events.models import EventoSocial
+from back.apps.events.models import EventoSocial
 
 User = get_user_model()
 

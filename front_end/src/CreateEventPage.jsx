@@ -259,7 +259,7 @@ function CreateEventPage({
             <h3>Plataforma</h3>
             <a href="/#mapa">Explorar projetos</a>
             <a href="/cadastrar-evento">Criar projeto</a>
-            <a href="#">Entrar na comunidade</a>
+            <a href="/login">Entrar na comunidade</a>
           </div>
 
           <div>
