@@ -147,3 +147,9 @@ SIMPLE_JWT = {
 }
 
 CORS_ALLOWED_ORIGINS = True
+
+
+# Configuração do GeoDjango para a nuvem (Railway)
+# Se estiver no seu PC local, isso retorna None e ele usa o padrão do Windows
+GDAL_LIBRARY_PATH = os.environ.get('GDAL_LIBRARY_PATH')
+GEOS_LIBRARY_PATH = os.environ.get('GEOS_LIBRARY_PATH')
