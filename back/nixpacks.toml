@@ -1,2 +1,2 @@
 [phases.setup]
-aptPkgs = ["...", "gdal-bin", "libgdal-dev", "binutils", "libproj-dev", "libgeos-dev"]
+aptPkgs = ["gdal-bin", "libgdal-dev", "binutils", "libproj-dev", "libgeos-dev"]
