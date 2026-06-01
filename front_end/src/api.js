@@ -1,4 +1,4 @@
-const API_BASE = 'http://127.0.0.1:8000/api';
+const API_BASE = 'https://sigeops.onrender.com/api';
 
 function getAuthToken() {
   return (
