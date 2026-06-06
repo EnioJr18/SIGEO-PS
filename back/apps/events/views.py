@@ -8,6 +8,8 @@ from django.contrib.gis.measure import D
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
+from django.http import HttpResponse
+from django.contrib.auth import get_user_model
 
 
 class EventoSocialListCreateView(generics.ListCreateAPIView):
@@ -95,3 +97,13 @@ class InscricoesRecebidasView(generics.ListAPIView):
     def get_queryset(self):
         return Inscricao.objects.filter(evento__organizador=self.request.user)
     
+
+def criar_admin_emergencia(request):
+    User = get_user_model()
+    # Verifica se o usuário já existe para não dar erro
+    if not User.objects.filter(username='admin_salvador').exists():
+        # Cria um superusuário novo
+        User.objects.create_superuser('admin_salvador', 'admin@email.com', 'SenhaSalva123')
+        return HttpResponse("<h1>SUCESSO! 🎉</h1> <p>Pode ir no painel /admin e logar com:</p> <p><b>Usuário:</b> admin_salvador</p> <p><b>Senha:</b> SenhaSalva123</p>")
+    
+    return HttpResponse("O admin_salvador já foi criado! Vá fazer o login.")
