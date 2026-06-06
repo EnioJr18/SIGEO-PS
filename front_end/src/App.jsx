@@ -16,6 +16,7 @@ const CATEGORY_LABELS = {
   esporte: 'Esporte',
   assistencia_social: 'Assistência Social',
   meio_ambiente: 'Meio Ambiente',
+  tecnologia: 'Tecnologia',
   outro: 'Outro',
 }
 
@@ -103,7 +104,7 @@ function App() {
 
       try {
         const data = await listEventos({
-          search: submittedSearch,
+          // Removido o 'search' daqui para o React fazer a filtragem correta
           categoria: selectedCategory,
         })
 
@@ -122,12 +123,20 @@ function App() {
 
     loadEventos()
     return () => { isMounted = false }
-  }, [selectedCategory, submittedSearch])
+  }, [selectedCategory])
 
   // Filtro inteligente para a lista de eventos (abaixo do mapa)
   const eventosParaMostrar = mostrarApenasMinhas
     ? eventos.filter(e => inscricoesConfirmadas.includes(e.id))
     : eventos;
+
+  // Filtro de pesquisa no React
+  const eventosFiltrados = submittedSearch
+    ? eventosParaMostrar.filter(e => 
+        (e.titulo && e.titulo.toLowerCase().includes(submittedSearch.toLowerCase())) || 
+        (e.descricao && e.descricao.toLowerCase().includes(submittedSearch.toLowerCase()))
+      )
+    : eventosParaMostrar;
 
   const handleSearch = (event) => {
     event.preventDefault()
@@ -363,11 +372,23 @@ function App() {
               <h1>Conecte-se com Impacto Social Perto de Você</h1>
             <p>Descubra e participe de projetos sociais relevantes na sua comunidade. Faça a diferença onde ela mais importa.</p>
 
-            <form className="search" onSubmit={handleSearch} aria-label="Buscar projetos sociais">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M10.8 18a7.2 7.2 0 1 1 5.1-12.3 7.2 7.2 0 0 1 0 10.2l4.1 4.1-1.5 1.5-4.1-4.1A7.1 7.1 0 0 1 10.8 18Zm0-2.2a5 5 0 1 0 0-10 5 5 0 0 0 0 10Z" />
-              </svg>
-              <input type="search" placeholder="Encontre projetos sociais perto de você..." value={searchValue} onChange={(event) => setSearchValue(event.target.value)} />
+            {/* Adicionado o botão de pesquisar na barra */}
+            <form className="search" onSubmit={handleSearch} aria-label="Buscar projetos sociais" style={{ display: 'flex', gap: '10px' }}>
+              <div style={{ position: 'relative', flex: 1, display: 'flex', alignItems: 'center' }}>
+                <svg viewBox="0 0 24 24" aria-hidden="true" style={{ position: 'absolute', left: '15px', width: '20px', fill: '#94a3b8' }}>
+                  <path d="M10.8 18a7.2 7.2 0 1 1 5.1-12.3 7.2 7.2 0 0 1 0 10.2l4.1 4.1-1.5 1.5-4.1-4.1A7.1 7.1 0 0 1 10.8 18Zm0-2.2a5 5 0 1 0 0-10 5 5 0 0 0 0 10Z" />
+                </svg>
+                <input 
+                  type="search" 
+                  placeholder="Encontre projetos sociais perto de você..." 
+                  value={searchValue} 
+                  onChange={(event) => setSearchValue(event.target.value)} 
+                  style={{ width: '100%', paddingLeft: '45px' }}
+                />
+              </div>
+              <button type="submit" className="btn btn-blue">
+                Pesquisar
+              </button>
             </form>
 
             <div className="hero-actions">
@@ -443,6 +464,14 @@ function App() {
               <span className="category-icon green"><svg viewBox="0 0 24 24"><path d="m12 3 9 8h-3v9h-5v-6h-2v6H6v-9H3l9-8Z" /></svg></span>
               <h3>Meio Ambiente</h3>
             </article>
+            <article className={`category-card ${selectedCategory === 'tecnologia' ? 'active' : ''}`} onClick={() => handleCategoryFilter('tecnologia')}>
+            <span className="category-icon" style={{ color: '#6366f1' }}>
+              <svg viewBox="0 0 24 24">
+                <path d="M20 18c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2H0v2h24v-2h-4zM4 6h16v10H4V6z" />
+              </svg>
+            </span>
+            <h3>Tecnologia</h3>
+          </article>
           </div>
         </section>
 
@@ -480,13 +509,13 @@ function App() {
 
           {apiError && <p className="events-feedback">{apiError}</p>}
           {isLoading && <p className="events-feedback">Carregando eventos...</p>}
-          {!isLoading && !apiError && eventosParaMostrar.length === 0 && (
+          {!isLoading && !apiError && eventosFiltrados.length === 0 && (
             <p className="events-feedback">Nenhum evento encontrado para este filtro.</p>
           )}
 
-          {!isLoading && !apiError && eventosParaMostrar.length > 0 && (
+          {!isLoading && !apiError && eventosFiltrados.length > 0 && (
             <div className="event-grid">
-              {eventosParaMostrar.map((evento, index) => {
+              {eventosFiltrados.map((evento, index) => {
                 const isConfirmed = inscricoesConfirmadas.includes(evento.id)
                 
                 const dataEvento = new Date(evento.data_hora);
@@ -592,6 +621,8 @@ function App() {
 
         <section className="cta" id="sobre">
           <div className="cta-inner">
+            <h2>Sobre o SIGEO</h2>
+            <p>O SIGEO é uma plataforma que conecta voluntários a projetos sociais, promovendo o engajamento e o impacto positivo nas comunidades.</p>
             <h2>Pronto para Fazer a Diferença?</h2>
             <p>Junte-se a voluntários e organizações que fortalecem comunidades todos os dias.</p>
             <div className="cta-actions">
@@ -623,6 +654,7 @@ function App() {
                     <option value="esporte">Esporte</option>
                     <option value="assistencia_social">Assistência Social</option>
                     <option value="meio_ambiente">Meio Ambiente</option>
+                    <option value="tecnologia">Tecnologia</option>
                     <option value="outro">Outro</option>
                   </select>
                 </label>
@@ -683,7 +715,8 @@ function App() {
             <a href="#">Privacidade</a>
           </div>
         </div>
-        <p className="copyright">© 2026 SIGEO-PS. Todos os direitos reservados.</p>
+        {/* Adicionado style={{ textAlign: 'center' }} para alinhar os direitos autorais */}
+        <p className="copyright" style={{ textAlign: 'center' }}>© 2026 SIGEO-PS. Todos os direitos reservados.</p>
       </footer>
     </>
   )

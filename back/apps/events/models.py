@@ -12,6 +12,7 @@ class EventoSocial(models.Model):
         ('esporte', 'Esporte'),
         ('assistencia_social', 'Assistência Social'),
         ('meio_ambiente', 'Meio Ambiente'),
+        ('tecnologia', 'Tecnologia'),
         ('outro', 'Outro'),
     ]
 

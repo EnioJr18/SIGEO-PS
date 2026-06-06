@@ -10,18 +10,42 @@ function RegisterPage({ onSubmit, registerError, registerSuccess }) {
     role: 'comum',
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
+  
+  // 1. Criamos um estado para segurar os nossos erros locais de Front-end
+  const [localError, setLocalError] = useState('') 
 
   const handleChange = (event) => {
-    const { name, value } = event.target
+    let { name, value } = event.target
+
+    // 2. Trava de UX: Se for o campo username, removemos os espaços automaticamente
+    if (name === 'username') {
+      value = value.replace(/\s/g, '')
+    }
 
     setForm((current) => ({
       ...current,
       [name]: value,
     }))
+    
+    // Limpa o aviso de erro assim que o usuário volta a digitar
+    setLocalError('') 
   }
 
   const handleSubmit = async (event) => {
     event.preventDefault()
+
+    // 3. Validação explícita pro QA: Barra o envio se tiver espaço
+    if (form.username.includes(' ')) {
+      setLocalError('O nome de usuário não pode conter espaços. Ex: Entony_QA')
+      return
+    }
+
+    // Validação extra (Bônus): Verifica se as senhas estão iguais
+    if (form.password !== form.confirmPassword) {
+      setLocalError('As senhas não coincidem.')
+      return
+    }
+
     setIsSubmitting(true)
 
     try {
@@ -128,7 +152,9 @@ function RegisterPage({ onSubmit, registerError, registerSuccess }) {
             />
           </label>
 
-          {registerError && <p className="form-feedback error">{registerError}</p>}
+          {/* 4. Trocamos os erros originais para dar preferência ao nosso erro local primeiro */}
+          {localError && <p className="form-feedback error">{localError}</p>}
+          {registerError && !localError && <p className="form-feedback error">{registerError}</p>}
           {registerSuccess && <p className="form-feedback success">{registerSuccess}</p>}
 
           <button className="btn btn-primary btn-wide" type="submit" disabled={isSubmitting}>
