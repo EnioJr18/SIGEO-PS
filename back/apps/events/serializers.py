@@ -70,6 +70,7 @@ class EventoSocialSerializer(serializers.ModelSerializer):
             'inscritos',
             'data_hora',
             'localizacao',
+            'endereco_texto',
             'criado_em',
             'organizador',
             'latitude',

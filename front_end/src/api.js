@@ -230,3 +230,11 @@ export const updateEvento = async (eventoId, payload) => {
   return response.json();
 };
 
+// Função para buscar um único evento pelo ID (para edição)
+export const getEvento = async (eventoId) => {
+  const response = await fetch(`${API_BASE}/eventos/${eventoId}/`);
+  if (!response.ok) {
+    throw new Error('Falha ao carregar os dados do projeto.');
+  }
+  return response.json();
+};

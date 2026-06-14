@@ -159,7 +159,12 @@ CORS_ALLOWED_ORIGINS = [
 CORS_ALLOW_CREDENTIALS = True
 
 
-# Configuração do GeoDjango para a nuvem (Railway)
-# Se estiver no seu PC local, isso retorna None e ele usa o padrão do Windows
-GDAL_LIBRARY_PATH = os.environ.get('GDAL_LIBRARY_PATH')
-GEOS_LIBRARY_PATH = os.environ.get('GEOS_LIBRARY_PATH')
+# Configuração do GeoDjango para a nuvem (Railway/Deploy)
+# Só sobrescreve se a variável de ambiente realmente existir na nuvem
+_env_gdal = os.environ.get('GDAL_LIBRARY_PATH')
+_env_geos = os.environ.get('GEOS_LIBRARY_PATH')
+
+if _env_gdal:
+    GDAL_LIBRARY_PATH = _env_gdal
+if _env_geos:
+    GEOS_LIBRARY_PATH = _env_geos

@@ -1,15 +1,122 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import AddressAutocomplete from '../AddressAutocomplete.jsx';
+import { useNavigate, useParams } from 'react-router-dom';
+import { createEvento, updateEvento, getEvento } from '../api';
 
-export default function CriarEvento({
-  eventForm,
-  onFormChange,
-  onSubmit,
-  createError,
-  createSuccess,
-  address,
-  setAddress
-}) {
+export default function CriarEvento() {
+  const navigate = useNavigate();
+  const { id } = useParams(); // Pega o ID da URL
+  const isEditMode = !!id;    // Se tem ID, é modo edição (true)
+
+  // O componente agora gerencia o próprio estado!
+  const [eventForm, setEventForm] = useState({
+    titulo: '',
+    categoria: 'saude',
+    vagas: '',
+    data_hora: '',
+    link_comprovacao: '',
+    descricao: '',
+    endereco_texto: ''
+  });
+  const [address, setAddress] = useState('');
+  
+  // Estados para feedback visual
+  const [loading, setLoading] = useState(isEditMode);
+  const [createError, setCreateError] = useState('');
+  const [createSuccess, setCreateSuccess] = useState('');
+
+// Efeito para carregar os dados se for edição
+  useEffect(() => {
+    if (isEditMode) {
+      const fetchEvento = async () => {
+        try {
+          const data = await getEvento(id);
+          setEventForm({
+            titulo: data.titulo || '',
+            categoria: data.categoria || 'saude',
+            vagas: data.vagas || '',
+            data_hora: data.data_hora ? data.data_hora.slice(0, 16) : '',
+            link_comprovacao: data.link_comprovacao || '',
+            descricao: data.descricao || '',
+            endereco_texto: data.endereco_texto || ''
+          });
+          
+          // Limpa a coordenada do banco e inverte para o padrão humano: Latitude, Longitude
+          let loc = data.localizacao || '';
+          if (loc.includes('SRID=')) {
+            const coords = loc.replace('SRID=4326;POINT (', '').replace(')', '').split(' ');
+            if (coords.length === 2) {
+              const lng = coords[0];
+              const lat = coords[1];
+              loc = `${lat}, ${lng}`; // Aqui a mágica acontece: Lat na frente!
+            }
+          }
+          setAddress(loc);
+
+        } catch (error) {
+          console.error("Erro ao carregar projeto:", error);
+          setCreateError("Não foi possível carregar os dados do projeto.");
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchEvento();
+    }
+  }, [id, isEditMode]);
+
+  // Função para atualizar os campos enquanto o usuário digita
+  const onFormChange = (e) => {
+    setEventForm({
+      ...eventForm,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  // Função para salvar (Criar ou Atualizar)
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setCreateError('');
+    setCreateSuccess('');
+
+    // Se a coordenada estiver limpa (com vírgula), invertemos de volta para Longitude, Latitude (X Y) para o Django
+    let finalLocation = address;
+    if (finalLocation && !finalLocation.includes('SRID') && finalLocation.includes(',')) {
+      const parts = finalLocation.split(',');
+      if (parts.length === 2) {
+        const lat = parts[0].trim();
+        const lng = parts[1].trim();
+        finalLocation = `SRID=4326;POINT(${lng} ${lat})`; // Lng na frente para o PostGIS!
+      }
+    }
+
+    const payload = {
+      ...eventForm,
+      localizacao: finalLocation 
+    };
+
+    try {
+      if (isEditMode) {
+        await updateEvento(id, payload);
+        setCreateSuccess("Projeto atualizado com sucesso!");
+        setTimeout(() => navigate('/painel'), 1500); // Redireciona após 1.5s
+      } else {
+        await createEvento(payload);
+        setCreateSuccess("Projeto publicado com sucesso!");
+        setTimeout(() => navigate('/painel'), 1500);
+      }
+    } catch (error) {
+      setCreateError(error.message || "Ocorreu um erro ao salvar o projeto.");
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="py-16 bg-slate-50 min-h-screen flex items-center justify-center">
+        <p className="text-xl font-bold text-slate-500">Carregando dados do projeto...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="py-16 bg-slate-50 min-h-screen flex items-center justify-center">
       <div className="container mx-auto px-4 max-w-3xl">
@@ -19,14 +126,19 @@ export default function CriarEvento({
           
           {/* Cabeçalho do Card com Gradiente */}
           <div className="bg-gradient-to-r from-slate-900 to-emerald-900 p-8 text-center md:text-left">
-            <h1 className="text-3xl font-extrabold text-white mb-2 tracking-tight">Cadastrar Novo Projeto</h1>
+            {/* O Título muda automaticamente */}
+            <h1 className="text-3xl font-extrabold text-white mb-2 tracking-tight">
+              {isEditMode ? "Editar Projeto" : "Cadastrar Novo Projeto"}
+            </h1>
             <p className="text-emerald-100 text-lg">
-              Preencha os dados abaixo para publicar uma iniciativa social no mapa da sua comunidade.
+              {isEditMode 
+                ? "Atualize os dados da sua iniciativa abaixo." 
+                : "Preencha os dados abaixo para publicar uma iniciativa social no mapa da sua comunidade."}
             </p>
           </div>
 
           {/* Formulário */}
-          <form onSubmit={onSubmit} className="p-8 md:p-10">
+          <form onSubmit={handleSubmit} className="p-8 md:p-10">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
               
               <div className="md:col-span-2">
@@ -79,11 +191,22 @@ export default function CriarEvento({
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-sm font-bold text-slate-700 mb-2">Endereço Completo</label>
+                <label className="block text-sm font-bold text-slate-700 mb-2">Nome do Local ou Endereço</label>
+                <input 
+                  type="text" name="endereco_texto" value={eventForm.endereco_texto} onChange={onFormChange} required placeholder="Ex: Praça Central, Centro"
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all text-slate-700 placeholder-slate-400 bg-slate-50 focus:bg-white" 
+                />
+              </div>
+
+              {/* Mudei o label deste aqui para ficar mais claro */}
+              <div className="md:col-span-2">
+                <label className="block text-sm font-bold text-slate-700 mb-2">Pino no Mapa (Coordenada Oculta)</label>
                 <div className="w-full bg-slate-50 border border-slate-200 rounded-xl focus-within:ring-2 focus-within:ring-emerald-500 focus-within:bg-white transition-all overflow-hidden">
                   <AddressAutocomplete value={address} onChange={setAddress} />
                 </div>
-              </div>
+              </div>  
+
+              
 
               <div className="md:col-span-2">
                 <label className="block text-sm font-bold text-slate-700 mb-2">Descrição da Iniciativa</label>
@@ -108,11 +231,16 @@ export default function CriarEvento({
             )}
 
             <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-4 pt-6 border-t border-slate-100">
-              <a href="/projetos" className="w-full sm:w-auto px-6 py-3 text-center font-bold text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-full transition-colors">
+              <button 
+                type="button" 
+                onClick={() => navigate('/painel')} 
+                className="w-full sm:w-auto px-6 py-3 text-center font-bold text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-full transition-colors"
+              >
                 Cancelar
-              </a>
+              </button>
+              {/* O Botão também muda! */}
               <button type="submit" className="w-full sm:w-auto px-8 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-full shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all">
-                Publicar Projeto
+                {isEditMode ? "Salvar Alterações" : "Publicar Projeto"}
               </button>
             </div>
             

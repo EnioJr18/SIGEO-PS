@@ -29,6 +29,8 @@ class EventoSocial(models.Model):
 
     localizacao = models.PointField(srid=4326)
 
+    endereco_texto = models.CharField(max_length=255, blank=True, null=True)
+
     criado_em = models.DateTimeField(auto_now_add=True)
 
     organizador = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='eventos_organizados')

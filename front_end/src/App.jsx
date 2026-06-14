@@ -443,8 +443,9 @@ const handleLogin = async ({ identifier, password }) => {
 
           {/* Rotas do Organizador */}
           <Route path="/painel/lista/:id" element={<ListaInscritos />} />
+
+          <Route path="/criar-evento" element={<CriarEvento />} />
           
-          {/* Usamos o mesmo componente de criar, mas agora passando um aviso de que é edição (podemos ajustar a lógica dentro dele amanhã) */}
           <Route path="/editar-evento/:id" element={<CriarEvento />} />
           
           <Route path="/login" element={
@@ -455,28 +456,14 @@ const handleLogin = async ({ identifier, password }) => {
             <Cadastro onSubmit={handleRegister} registerError={registerError} registerSuccess={registerSuccess} />
           } />
           
-          <Route path="/cadastrar-evento" element={
-            <CriarEvento 
-              eventForm={eventForm} 
-              onFormChange={handleFormChange} 
-              onSubmit={handleCreateEvent} 
-              createError={createError} 
-              createSuccess={createSuccess} 
-              address={address}
-              setAddress={setAddress}
-            />
-          } />
+          
         </Routes>
       {/* ========================================= */}
       {/* ASSISTENTE DE IA (CHATBOT FLUTUANTE)      */}
       {/* ========================================= */}
       <Chatbot />
 
-      {/* ========================================= */}
-      {/* ALERTA FLUTUANTE (TOAST) FICA AQUI FORA!  */}
-      {/* ========================================= */}
-
-
+      
       {/* ========================================= */}
       {/* ALERTA FLUTUANTE (TOAST)                    */}
       {/* ========================================= */}
