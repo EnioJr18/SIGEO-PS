@@ -126,9 +126,12 @@ class InscricaoSerializer(serializers.ModelSerializer):
     participante_nome = serializers.SerializerMethodField()
     participante_email = serializers.SerializerMethodField()
 
+    evento_titulo = serializers.CharField(source='evento.titulo', read_only=True)
+    evento_data = serializers.DateTimeField(source='evento.data_hora', read_only=True)
+
     class Meta:
         model = Inscricao
-        fields = ['id', 'evento', 'participante', 'participante_nome', 'participante_email', 'status', 'data_inscricao']
+        fields = ['id', 'evento', 'evento_titulo', 'evento_data', 'participante', 'participante_nome', 'participante_email', 'status', 'data_inscricao']
         read_only_fields = ['status', 'data_inscricao']
         
         validators = []

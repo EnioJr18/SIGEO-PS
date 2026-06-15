@@ -1,7 +1,7 @@
 from rest_framework import generics
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from .models import CustomUser
-from .serializers import RegisterSerializer, UserSerializer
+from .serializers import RegisterSerializer, UserSerializer, UserProfileSerializer
 
 class RegisterView(generics.CreateAPIView):
     queryset = CustomUser.objects.all()    
@@ -13,4 +13,12 @@ class PerfilView(generics.RetrieveAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_object(self):
+        return self.request.user
+
+class UserProfileView(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = UserProfileSerializer
+    permission_classes = [IsAuthenticated] # Só quem está logado entra
+
+    def get_object(self):
+        # Ignora qualquer ID na URL e garante que o usuário só mexe na própria conta
         return self.request.user

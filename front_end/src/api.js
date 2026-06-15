@@ -1,4 +1,5 @@
-const API_BASE = 'https://sigeops.onrender.com/api';
+// const API_BASE = 'https://sigeops.onrender.com/api';
+export const API_BASE = 'http://localhost:8000/api';
 
 function getAuthToken() {
   return (
@@ -237,4 +238,38 @@ export const getEvento = async (eventoId) => {
     throw new Error('Falha ao carregar os dados do projeto.');
   }
   return response.json();
+};
+
+// ==========================================
+// PAINEL DO PARTICIPANTE (PERFIL E INSCRIÇÕES)
+// ==========================================
+
+// Busca os dados do perfil logado
+export const getPerfil = async () => {
+  const response = await fetch(`${API_BASE}/users/perfil/`, {
+    headers: getAuthHeaders(),
+  });
+  if (!response.ok) throw new Error('Falha ao carregar perfil.');
+  return response.json();
+};
+
+// Atualiza o perfil logado
+export const updatePerfil = async (dados) => {
+  const response = await fetch(`${API_BASE}/users/perfil/`, {
+    method: 'PATCH',
+    headers: getAuthHeaders(),
+    body: JSON.stringify(dados),
+  });
+  if (!response.ok) throw new Error('Falha ao atualizar perfil.');
+  return response.json();
+};
+
+// Exclui a conta permanentemente
+export const deletePerfil = async () => {
+  const response = await fetch(`${API_BASE}/users/perfil/`, {
+    method: 'DELETE',
+    headers: getAuthHeaders(),
+  });
+  if (!response.ok) throw new Error('Falha ao excluir conta.');
+  return true; // DELETE costuma retornar vazio com status 204
 };

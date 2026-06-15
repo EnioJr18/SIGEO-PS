@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-// IMPORTANTE: Importando o Roteador do React
 import { Routes, Route, useNavigate } from "react-router-dom"; 
+
+import "./App.css";
 
 import {
   createEvento,
@@ -12,7 +13,8 @@ import {
   cancelarInscricao,
   getMinhasInscricoes,
 } from "./api";
-// Importando as nossas páginas da pasta correta (pages)
+
+// Importando as Páginas
 import Home from "./pages/Home.jsx";
 import Projetos from "./pages/Projetos.jsx";
 import CriarEvento from "./pages/CriarEvento.jsx";
@@ -21,296 +23,157 @@ import Cadastro from "./pages/Cadastro.jsx";
 import DashboardImpacto from "./pages/DashboardImpacto.jsx";
 import PainelOrganizador from "./pages/PainelOrganizador.jsx";
 import ListaInscritos from './pages/ListaInscritos';
+import PainelParticipante from './pages/PainelParticipante';
+import Perfil from './pages/Perfil'; // Nossa nova tela universal
 import Chatbot from './Chatbot';
-import "./App.css";
 
-const CATEGORY_LABELS = {
-  saude: "Saúde",
-  educacao: "Educação",
-  cultura: "Cultura",
-  esporte: "Esporte",
-  assistencia_social: "Assistência Social",
-  meio_ambiente: "Meio Ambiente",
-  tecnologia: "Tecnologia",
-  outro: "Outro",
-};
-
-function App() {
-  const navigate = useNavigate(); // Hook do react-router para navegação programática
+export default function App() {
+  const navigate = useNavigate(); 
+  
+  // ==========================================
+  // ESTADOS GERAIS DA APLICAÇÃO
+  // ==========================================
   const [eventos, setEventos] = useState([]);
   const [isLoadingEventos, setIsLoadingEventos] = useState(true);
-  const [apiError, setApiError] = useState("");
-  const [createError, setCreateError] = useState("");
-  const [createSuccess, setCreateSuccess] = useState("");
-  const [loginError, setLoginError] = useState("");
-  const [loginSuccess, setLoginSuccess] = useState("");
-  const [registerError, setRegisterError] = useState("");
-  const [registerSuccess, setRegisterSuccess] = useState("");
   const [searchValue, setSearchValue] = useState("");
-  const [submittedSearch, setSubmittedSearch] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("");
-  const [toastMessage, setToastMessage] = useState("Selecione um projeto no mapa");
-  
-  // Estado para o Modal da Home
+  const [toastMessage, setToastMessage] = useState("");
   const [eventoSelecionado, setEventoSelecionado] = useState(null);
-  
-  const [address, setAddress] = useState("");
-  const [eventForm, setEventForm] = useState({
-    titulo: "",
-    descricao: "",
-    categoria: "outro",
-    vagas: "20",
-    data_hora: "",
-    link_comprovacao: "",
-  });
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-const [mostrarApenasMinhas, setMostrarApenasMinhas] = useState(false);
-  const isAuthenticated = !!localStorage.getItem("accessToken") || !!localStorage.getItem("token");
-  
-  // Agora o React puxa o nome e a função da memória assim que a página carrega!
+  // ==========================================
+  // ESTADOS DE AUTENTICAÇÃO E USUÁRIO
+  // ==========================================
+  const isAuthenticated = !!(localStorage.getItem("accessToken") || localStorage.getItem("token"));
   const [userName, setUserName] = useState(localStorage.getItem("userName") || "");
   const [userRole, setUserRole] = useState(localStorage.getItem("userRole") || "");
   const [inscricoesConfirmadas, setInscricoesConfirmadas] = useState([]);
 
-  // ... (seus estados iniciais aqui)
+  // Estados de erro/sucesso dos formulários
+  const [loginError, setLoginError] = useState("");
+  const [loginSuccess, setLoginSuccess] = useState("");
+  const [registerError, setRegisterError] = useState("");
+  const [registerSuccess, setRegisterSuccess] = useState("");
 
-useEffect(() => {
-    const token = localStorage.getItem("accessToken") || localStorage.getItem("token");
-    if (token) {
-      // Como o isAuthenticated já se vira sozinho, só precisamos puxar os dados e inscrições!
+  // ==========================================
+  // EFEITOS (CARREGAMENTO INICIAL)
+  // ==========================================
+  useEffect(() => {
+    if (isAuthenticated) {
       setUserName(localStorage.getItem("userName") || "Usuário");
       setUserRole(localStorage.getItem("userRole") || "Participante");
 
-      // Puxa as inscrições do usuário
       getMinhasInscricoes()
-        .then(data => {
-          setInscricoesConfirmadas(Array.isArray(data) ? data : []);
-        })
-        .catch(error => {
-          console.error("Erro ao puxar inscrições do usuário:", error);
-          setInscricoesConfirmadas([]);
-        });
+        .then(data => setInscricoesConfirmadas(Array.isArray(data) ? data : []))
+        .catch(error => console.error("Erro ao puxar inscrições:", error));
     }
-  }, []);
-
+  }, [isAuthenticated]);
 
   useEffect(() => {
     const fetchEventos = async () => {
       try {
         setIsLoadingEventos(true);
-        // Usa a função do seu api.js para buscar no backend
         const data = await listEventos(); 
         setEventos(Array.isArray(data) ? data : []);
       } catch (error) {
         console.error("Erro ao buscar projetos:", error);
-        setEventos([]);
       } finally {
         setIsLoadingEventos(false);
       }
     };
-
     fetchEventos();
   }, []);
 
-  // -----------------------------------------------------
-  // TEMPORIZADOR DO ALERTA (TOAST)
-  // -----------------------------------------------------
   useEffect(() => {
     if (toastMessage) {
-      // Se tiver uma mensagem, esconde ela depois de 3.5 segundos
-      const timer = setTimeout(() => {
-        setToastMessage("");
-      }, 3500);
-      
-      // Limpeza de segurança do React
+      const timer = setTimeout(() => setToastMessage(""), 3500);
       return () => clearTimeout(timer);
     }
   }, [toastMessage]);
 
-  const eventosParaMostrar = mostrarApenasMinhas
-    ? eventos.filter((e) => inscricoesConfirmadas.includes(e.id))
-    : eventos;
+  // ==========================================
+  // FUNÇÕES DE NAVEGAÇÃO E INTERAÇÃO
+  // ==========================================
+  const toggleMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
 
-  const eventosFiltrados = submittedSearch
-    ? eventosParaMostrar.filter(
-        (e) =>
-          (e.titulo && e.titulo.toLowerCase().includes(submittedSearch.toLowerCase())) ||
-          (e.descricao && e.descricao.toLowerCase().includes(submittedSearch.toLowerCase())),
-      )
-    : eventosParaMostrar;
-
-  // -----------------------------------------------------
-  // FILTRO POR CATEGORIA (Direto do Banco de Dados)
-  // -----------------------------------------------------
   const handleCategoryFilter = async (categoria) => {
     try {
       setIsLoadingEventos(true);
-      
       const paramCategoria = (categoria === 'todas' || categoria === 'Todos') ? '' : categoria;
       const data = await listEventos({ categoria: paramCategoria });
-      
       setEventos(Array.isArray(data) ? data : []);
-
-      // NOVIDADE: Rola suavemente até a seção de eventos após filtrar
-      setTimeout(() => {
-        document.getElementById('eventos')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 100);
-
+      setTimeout(() => document.getElementById('eventos')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
     } catch (error) {
-      console.error("Erro ao filtrar projetos por categoria:", error);
-      setEventos([]);
+      console.error("Erro ao filtrar projetos:", error);
     } finally {
       setIsLoadingEventos(false);
     }
   };
 
-  // -----------------------------------------------------
-  // BUSCA POR TEXTO (Barra de Pesquisa)
-  // -----------------------------------------------------
   const handleSearch = async (event) => {
     if (event) event.preventDefault();
-    
     try {
       setIsLoadingEventos(true);
-      
       const data = await listEventos({ search: searchValue });
       setEventos(Array.isArray(data) ? data : []);
-
-      // NOVIDADE: Rola suavemente até a seção de eventos após pesquisar
-      setTimeout(() => {
-        document.getElementById('eventos')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 200);
-
+      setTimeout(() => document.getElementById('eventos')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
     } catch (error) {
       console.error("Erro ao buscar projetos:", error);
-      setEventos([]);
     } finally {
       setIsLoadingEventos(false);
     }
   };
 
-// -----------------------------------------------------
-  // INSCRIÇÃO E CANCELAMENTO EM PROJETOS
-  // -----------------------------------------------------
   const handleParticipar = async (eventoId) => {
     if (!isAuthenticated) {
-      if (typeof setToastMessage === 'function') setToastMessage("Você precisa entrar na sua conta!");
-      setTimeout(() => window.location.assign("/login"), 1500);
+      setToastMessage("Você precisa entrar na sua conta!");
+      setTimeout(() => navigate("/login"), 1500);
       return;
     }
-
     try {
-      // Verifica se o usuário já está inscrito no evento
       const jaInscrito = inscricoesConfirmadas.some(inscricao => inscricao.evento === eventoId);
-
       if (jaInscrito) {
-        // Se já está inscrito, faz o cancelamento
         await cancelarInscricao(eventoId);
-        if (typeof setToastMessage === 'function') setToastMessage("Inscrição cancelada com sucesso.");
+        setToastMessage("Inscrição cancelada com sucesso.");
       } else {
-        // Se não está, faz a inscrição
         await inscreverEvento(eventoId);
-        if (typeof setToastMessage === 'function') setToastMessage("Inscrição confirmada com sucesso! 🎉");
+        setToastMessage("Inscrição confirmada com sucesso! 🎉");
       }
-
-      // Atualiza a lista local na mesma hora
       const atualizadas = await getMinhasInscricoes();
       setInscricoesConfirmadas(Array.isArray(atualizadas) ? atualizadas : []);
-
     } catch (error) {
-      if (typeof setToastMessage === 'function') {
-        setToastMessage(error.message || "Erro ao processar sua solicitação.");
-      } else {
-        alert(error.message || "Erro ao processar sua solicitação.");
-      }
+      setToastMessage(error.message || "Erro ao processar sua solicitação.");
     }
   };
 
-  const handleCreateEvent = async (event) => {
-    event.preventDefault();
-    setCreateError("");
-    setCreateSuccess("");
-
-    try {
-      // 1. Junta os dados do formulário com o endereço do Autocomplete
-      const payload = {
-        ...eventForm,
-        endereco: address // Certifique-se de que o backend espera o campo "endereco"
-      };
-
-      // 2. Dispara para a API
-      await createEvento(payload);
-      
-      setCreateSuccess("Projeto publicado com sucesso!");
-      
-      // 3. Limpa o formulário
-      setEventForm({ titulo: '', categoria: 'saude', vagas: '', data_hora: '', link_comprovacao: '', descricao: '' });
-      setAddress('');
-      
-      // 4. Recarrega a lista de eventos para o mapa e a tela de projetos atualizarem na hora
-      const updatedEventos = await listEventos();
-      setEventos(Array.isArray(updatedEventos) ? updatedEventos : []);
-
-      // 5. Manda o usuário de volta para a tela de projetos
-      setTimeout(() => navigate("/projetos"), 1500);
-      
-    } catch (error) {
-      setCreateError(error.message || "Erro ao publicar o projeto. Verifique os dados.");
-    }
-  };
-
-  const handleFormChange = (e) => {
-    const { name, value } = e.target;
-    setEventForm((current) => ({ ...current, [name]: value }));
-  };
-
+  // ==========================================
+  // AUTENTICAÇÃO (LOGIN, REGISTRO E LOGOUT)
+  // ==========================================
   const handleLogout = (event) => {
-    event.preventDefault();
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("refreshToken");
-    localStorage.removeItem("token");
-    localStorage.removeItem("userRole");
-    window.location.assign("/"); // Limpa o estado real do navegador no logout
+    if (event) event.preventDefault();
+    localStorage.clear();
+    window.location.assign("/"); 
   };
 
-const handleLogin = async ({ identifier, password }) => {
+  const handleLogin = async ({ identifier, password }) => {
     setLoginError("");
     setLoginSuccess("");
-    
     try {
-      // 1. Faz o login e pega os Tokens[cite: 5]
       const data = await loginUser({ username: identifier.trim(), password });
-      
       if (data?.access) localStorage.setItem("accessToken", data.access);
-      if (data?.refresh) localStorage.setItem("refreshToken", data.refresh);
       if (data?.token) localStorage.setItem("token", data.token);
 
-      // 2. COMBO OBRIGATÓRIO: Buscar os dados do usuário para saber o "role"[cite: 5]
       try {
         const profileInfo = await getProfile();
-        
-        // Salva o nome para a Navbar
         localStorage.setItem("userName", profileInfo.username || profileInfo.first_name || identifier);
-        
-        // Formata o papel do usuário (role). 
-        // O backend normalmente retorna "organizador" ou "comum"[cite: 5].
-        const roleRaw = profileInfo.role || "comum";
-        const roleFormatado = roleRaw === "organizador" ? "Organizador" : "Participante";
+        const roleFormatado = profileInfo.role === "organizador" ? "Organizador" : "Participante";
         localStorage.setItem("userRole", roleFormatado);
-        
       } catch (profileError) {
-         console.warn("Aviso: Token recebido, mas não foi possível buscar o perfil completo.", profileError);
-         // Define um padrão seguro caso a rota /me falhe
          localStorage.setItem("userName", identifier);
          localStorage.setItem("userRole", "Participante");
       }
 
       setLoginSuccess("Entrada realizada com sucesso. Redirecionando...");
-      
-      // Forçamos o reload da página para que o App.jsx leia o localStorage novamente
-      // e monte as rotas corretamente (liberando o /painel se for Organizador)
       setTimeout(() => window.location.assign("/"), 800);
-      
     } catch (error) {
       setLoginError(error.message || "Não foi possível entrar. Confira seus dados.");
     }
@@ -319,28 +182,15 @@ const handleLogin = async ({ identifier, password }) => {
   const handleRegister = async ({ username, email, password, confirmPassword, role }) => {
     setRegisterError("");
     setRegisterSuccess("");
-
     if (password !== confirmPassword) {
       setRegisterError("As senhas precisam ser iguais.");
       return;
     }
-
     try {
-      // Cria a conta enviando os dados limpos para a API[cite: 5]
       await registerUser({ username: username.trim(), email: email.trim(), password, role });
-      
       setRegisterSuccess("Cadastro criado com sucesso. Agora você já pode entrar.");
-      
-      // Caso você tenha uma função global de Toast, a mantemos aqui
-      if (typeof setToastMessage === 'function') {
-        setToastMessage("Cadastro criado com sucesso.");
-      }
-      
-      // Troquei o window.location.assign pelo navigate (se disponível no App.jsx) 
-      // ou mantemos o window.location dependendo de como está o escopo. 
-      // Usando window.location para garantir que não dê erro de hook fora de escopo.
-      setTimeout(() => window.location.assign("/login"), 1500);
-      
+      setToastMessage("Cadastro criado com sucesso.");
+      setTimeout(() => navigate("/login"), 1500);
     } catch (error) {
       setRegisterError(error.message || "Não foi possível criar sua conta.");
     }
@@ -348,188 +198,119 @@ const handleLogin = async ({ identifier, password }) => {
 
   return (
     <div className="flex flex-col min-h-screen">
+      
+      {/* ==========================================
+          CABEÇALHO (NAVBAR MINIMALISTA UNIVERSAL)
+      ========================================== */}
       <header className="sticky top-0 z-50 bg-slate-900 text-white shadow-md transition-all">
-        <nav className="container mx-auto px-4 py-3 flex items-center justify-between" aria-label="Navegacao principal">
-          <button onClick={() => navigate("/")} className="flex items-center gap-2 text-xl font-bold tracking-tight hover:text-blue-400 transition-colors">
+        <nav className="container mx-auto px-4 py-3 flex items-center justify-between">
+          <button onClick={() => { navigate("/"); setIsMobileMenuOpen(false); }} className="flex items-center gap-2 text-xl font-bold tracking-tight hover:text-blue-400 transition-colors">
             <span aria-hidden="true" className="w-6 h-6 fill-current text-blue-500">
-              <svg viewBox="0 0 24 24" role="img"><path d="M4 19V8.5L12 4l8 4.5V19h-5v-6H9v6H4Zm7-8h2V8h-2v3Z" /></svg>
+              <svg viewBox="0 0 24 24"><path d="M4 19V8.5L12 4l8 4.5V19h-5v-6H9v6H4Zm7-8h2V8h-2v3Z" /></svg>
             </span>
             <span>SIGEO-PS</span>
           </button>
 
-          <div className="hidden lg:flex items-center gap-6 text-sm font-medium text-slate-300">
-            <button onClick={() => navigate("/")} className="hover:text-white hover:underline underline-offset-4 transition-all">Início</button>
-            <button onClick={() => navigate("/projetos")} className="hover:text-white hover:underline underline-offset-4 transition-all">Eventos</button>
-            <button onClick={() => navigate("/dashboard")} className="hover:text-white hover:underline underline-offset-4 transition-all">Impacto Social</button>
-            <button onClick={() => {navigate("/");setTimeout(() => document.getElementById('sobre')?.scrollIntoView({behavior: 'smooth'}), 100);}} className="hover:text-white hover:underline underline-offset-4 transition-all">Sobre</button>
-          </div>
-
-          {/* --- AÇÕES (Perfil, Login, Botão de Cadastro) --- */}
-          <div className="flex items-center gap-3 md:gap-4">
-            {isAuthenticated ? (
-              <div className="flex items-center gap-3 md:gap-4 whitespace-nowrap">
-                <span className="hidden md:flex items-center gap-1 bg-amber-400 text-amber-900 px-3 py-1 rounded-full text-xs font-bold shadow-sm">
-                  🏅 Cidadão Solidário
-                </span>
-                
-                <div className="flex flex-col items-end leading-tight">
-                  <span className="font-semibold text-slate-100 text-sm">Olá, {userName}!</span>
-                  {userRole && (
-                    <span className={`text-[0.65rem] px-2 py-0.5 rounded-full font-bold mt-0.5 ${userRole === "Organizador" ? "bg-teal-900 text-teal-300" : "bg-sky-900 text-sky-300"}`}>
-                      {userRole} {userRole === "Participante" && ` • ${inscricoesConfirmadas.length || 0} vagas`}
-                    </span>
-                  )}
-                </div>
-
-                {/* Botão Meu Painel (Aparece só para Organizador) */}
-                {userRole === "Organizador" && (
-                  <button onClick={() => navigate('/painel')} className="text-emerald-400 hover:text-emerald-300 text-sm font-medium ml-2 mr-2 transition-colors">
-                    Meu Painel
-                  </button>
-                )}
-
-                <button onClick={handleLogout} className="text-red-400 hover:text-red-300 text-sm font-medium ml-1 transition-colors">Sair</button>
-              </div>
-            ) : (
-              <div className="hidden md:flex items-center gap-4">
-                <button onClick={() => navigate("/cadastro")} className="text-sm font-medium text-slate-300 hover:text-white transition-colors">Criar conta</button>
-                <button onClick={() => navigate("/login")} className="text-sm font-medium text-white hover:text-blue-400 transition-colors">Entrar</button>
-              </div>
-            )}
-            
+          <div className="flex items-center gap-2 sm:gap-4">
             <button onClick={() => navigate("/cadastrar-evento")} className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-full text-sm font-bold shadow-md transition-all flex items-center justify-center whitespace-nowrap">
               <span className="hidden sm:inline">Cadastrar projeto</span>
               <span className="sm:hidden">+ Criar</span>
             </button>
+
+            <button className="text-slate-300 hover:text-white p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg" onClick={toggleMenu} aria-label="Abrir Menu">
+              {isMobileMenuOpen ? (
+                <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+              ) : (
+                <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
+              )}
+            </button>
           </div>
         </nav>
+
+        {isMobileMenuOpen && (
+          <div className="absolute top-full right-0 w-full lg:w-96 lg:right-4 bg-slate-900 border-t lg:border border-slate-800 shadow-2xl lg:rounded-b-2xl flex flex-col px-6 py-6 gap-2 transition-all">
+            {isAuthenticated && (
+              <div className="flex items-center justify-between pb-6 mb-2 border-b border-slate-800">
+                <div>
+                  <p className="text-base font-bold text-white">Olá, {userName}!</p>
+                  <span className={`text-xs px-2 py-0.5 rounded-full inline-block mt-1 ${userRole === "Organizador" ? "bg-teal-900 text-teal-300" : "bg-sky-900 text-sky-300"}`}>
+                    {userRole}
+                  </span>
+                </div>
+                <div className="flex items-center gap-1.5 px-3 py-1 bg-amber-400 text-amber-900 rounded-full text-xs font-bold shadow-sm">
+                  <span>🏅</span> Cidadão
+                </div>
+              </div>
+            )}
+
+            <button onClick={() => { navigate("/"); toggleMenu(); }} className="text-left text-slate-300 hover:text-white font-medium py-3 border-b border-slate-800/50">Início</button>
+            <button onClick={() => { navigate("/projetos"); toggleMenu(); }} className="text-left text-slate-300 hover:text-white font-medium py-3 border-b border-slate-800/50">Eventos</button>
+            <button onClick={() => { navigate("/dashboard"); toggleMenu(); }} className="text-left text-slate-300 hover:text-white font-medium py-3 border-b border-slate-800/50">Impacto Social</button>
+
+            <div className="flex flex-col gap-4 pt-6 mt-2 border-t border-slate-800">
+              {isAuthenticated ? (
+                <>
+                  {userRole === "Organizador" ? (
+                    <button onClick={() => { navigate('/painel'); toggleMenu(); }} className="text-emerald-400 font-bold text-lg text-center">Meu Painel de Eventos</button>
+                  ) : (
+                    <button onClick={() => { navigate('/agenda'); toggleMenu(); }} className="text-emerald-400 font-bold text-lg text-center">Minha Agenda</button>
+                  )}
+                  <button onClick={() => { navigate('/perfil'); toggleMenu(); }} className="text-blue-400 font-bold text-lg text-center">Configurações do Perfil</button>
+                  <button onClick={(e) => { toggleMenu(); handleLogout(e); }} className="text-center text-red-400 hover:text-red-300 font-bold py-2 mt-2 transition-colors">Sair da conta</button>
+                </>
+              ) : (
+                <>
+                  <button onClick={() => { navigate("/login"); toggleMenu(); }} className="w-full py-3 bg-slate-800 hover:bg-slate-700 text-white text-center font-bold rounded-xl transition-colors">Entrar</button>
+                  <button onClick={() => { navigate("/cadastro"); toggleMenu(); }} className="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white text-center font-bold rounded-xl shadow-md transition-colors">Criar conta</button>
+                </>
+              )}
+            </div>
+          </div>
+        )}
       </header>
 
+      {/* ==========================================
+          CORPO PRINCIPAL / ROTAS
+      ========================================== */}
       <main className="flex-grow">
-        {/* O CORAÇÃO DA APLICAÇÃO: O ROTEADOR */}
         <Routes>
-          {/* Página Inicial */}
-          <Route path="/" element={
-            <Home 
-              eventos={eventos} 
-              isLoading={isLoadingEventos}
-              apiError={apiError}
-              searchValue={searchValue}
-              setSearchValue={setSearchValue}
-              handleSearch={handleSearch}
-              handleParticipar={handleParticipar}
-              inscricoesConfirmadas={inscricoesConfirmadas}
-              setToastMessage={setToastMessage}
-              eventoSelecionado={eventoSelecionado}
-              setEventoSelecionado={setEventoSelecionado}
-              handleCategoryFilter={handleCategoryFilter}
-            />
-          } />
-
-          {/* Página de Lista de Projetos Completa */}
-          <Route path="/projetos" element={
-            <Projetos 
-              eventos={eventosFiltrados} 
-              handleParticipar={handleParticipar}
-              inscricoesConfirmadas={inscricoesConfirmadas}
-            />
-          } />
-
-          {/* Outras Páginas isoladas */}
+          <Route path="/" element={<Home eventos={eventos} isLoading={isLoadingEventos} searchValue={searchValue} setSearchValue={setSearchValue} handleSearch={handleSearch} handleParticipar={handleParticipar} inscricoesConfirmadas={inscricoesConfirmadas} setToastMessage={setToastMessage} eventoSelecionado={eventoSelecionado} setEventoSelecionado={setEventoSelecionado} handleCategoryFilter={handleCategoryFilter} />} />
+          <Route path="/projetos" element={<Projetos eventos={eventos} handleParticipar={handleParticipar} inscricoesConfirmadas={inscricoesConfirmadas} />} />
           <Route path="/dashboard" element={<DashboardImpacto />} />
-
-          {/* NOSSA NOVA ROTA DO PAINEL */}
-          <Route path="/painel" element={<PainelOrganizador eventos={eventos} />} />
-
-          {/* Rotas do Organizador */}
-          <Route path="/painel/lista/:id" element={<ListaInscritos />} />
-
-          <Route path="/criar-evento" element={<CriarEvento />} />
           
+          {/* Rotas de Organização e Participação */}
+          <Route path="/painel" element={<PainelOrganizador eventos={eventos} />} />
+          <Route path="/painel/lista/:id" element={<ListaInscritos />} />
+          <Route path="/agenda" element={<PainelParticipante />} />
+          <Route path="/perfil" element={<Perfil />} />
+          
+          <Route path="/criar-evento" element={<CriarEvento />} />
           <Route path="/editar-evento/:id" element={<CriarEvento />} />
           
-          <Route path="/login" element={
-            <Login onSubmit={handleLogin} loginError={loginError} loginSuccess={loginSuccess} />
-          } />
-          
-          <Route path="/cadastro" element={
-            <Cadastro onSubmit={handleRegister} registerError={registerError} registerSuccess={registerSuccess} />
-          } />
-          
-          
+          <Route path="/login" element={<Login onSubmit={handleLogin} loginError={loginError} loginSuccess={loginSuccess} />} />
+          <Route path="/cadastro" element={<Cadastro onSubmit={handleRegister} registerError={registerError} registerSuccess={registerSuccess} />} />
         </Routes>
-      {/* ========================================= */}
-      {/* ASSISTENTE DE IA (CHATBOT FLUTUANTE)      */}
-      {/* ========================================= */}
-      <Chatbot />
 
-      
-      {/* ========================================= */}
-      {/* ALERTA FLUTUANTE (TOAST)                    */}
-      {/* ========================================= */}
-      {toastMessage && (
-        <div className="fixed bottom-10 left-1/2 transform -translate-x-1/2 z-[200]">
-          <div className="bg-slate-900 text-white px-6 py-3.5 rounded-full shadow-2xl flex items-center gap-3 border border-slate-700 animate-[bounce_0.3s_ease-out_1]">
-            <span className="text-emerald-400 text-xl" aria-hidden="true">✨</span>
-            <span className="font-bold text-sm tracking-wide">{toastMessage}</span>
-            <button 
-              onClick={() => setToastMessage("")}
-              className="text-slate-400 hover:text-white ml-2 transition-colors focus:outline-none"
-              aria-label="Fechar alerta"
-            >
-              <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
-            </button>
+        <Chatbot />
+
+        {toastMessage && (
+          <div className="fixed bottom-10 left-1/2 transform -translate-x-1/2 z-[200]">
+            <div className="bg-slate-900 text-white px-6 py-3.5 rounded-full shadow-2xl flex items-center gap-3 border border-slate-700">
+              <span className="text-emerald-400 text-xl" aria-hidden="true">✨</span>
+              <span className="font-bold text-sm tracking-wide">{toastMessage}</span>
+            </div>
           </div>
-        </div>
-      )}
+        )}
       </main>
 
+      {/* ==========================================
+          RODAPÉ
+      ========================================== */}
       <footer className="footer bg-slate-950 text-slate-400 pt-16 pb-8 px-4 border-t border-slate-800">
-        <div className="container mx-auto max-w-6xl grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
-          
-          {/* Coluna 1: Logo (Ocupa 2 espaços no desktop) */}
-          <div className="md:col-span-2 flex flex-col items-start">
-            <button onClick={() => navigate("/")} className="flex items-center gap-2 text-xl font-bold tracking-tight text-white mb-4 hover:text-emerald-400 transition-colors">
-              <span aria-hidden="true" className="w-6 h-6 fill-current text-emerald-500">
-                <svg viewBox="0 0 24 24"><path d="M4 19V8.5L12 4l8 4.5V19h-5v-6H9v6H4Zm7-8h2V8h-2v3Z" /></svg>
-              </span>
-              <span>SIGEO-PS</span>
-            </button>
-            <p className="text-sm max-w-xs text-left leading-relaxed">
-              Conectando comunidades por tecnologia para criar impacto social real.
-            </p>
-          </div>
-          
-          {/* Coluna 2: Plataforma */}
-          <div className="flex flex-col items-start">
-            <h3 className="text-white font-bold mb-6 uppercase text-xs tracking-wider">Plataforma</h3>
-            <div className="flex flex-col items-start gap-3 text-sm">
-              <button onClick={() => navigate("/projetos")} className="hover:text-emerald-400 transition-colors text-left">Explorar projetos</button>
-              <button onClick={() => navigate("/cadastrar-evento")} className="hover:text-emerald-400 transition-colors text-left">Criar projeto</button>
-            </div>
-          </div>
-          
-          {/* Coluna 3: Suporte */}
-          <div className="flex flex-col items-start">
-            <h3 className="text-white font-bold mb-6 uppercase text-xs tracking-wider">Suporte</h3>
-            <div className="flex flex-col items-start gap-3 text-sm">
-              <button className="hover:text-emerald-400 transition-colors text-left">Central de ajuda</button>
-              <button className="hover:text-emerald-400 transition-colors text-left">Contato</button>
-            </div>
-          </div>
-        </div>
-        
-        {/* Direitos Autorais alinhados */}
-        <div className="container mx-auto max-w-6xl border-t border-slate-800 pt-8 flex flex-col md:flex-row items-center justify-between text-xs">
+        <div className="container mx-auto max-w-6xl flex flex-col md:flex-row items-center justify-between text-xs">
           <p>© 2026 SIGEO-PS. Todos os direitos reservados.</p>
-          <div className="flex gap-6 mt-4 md:mt-0">
-            <button className="hover:text-white transition-colors">Privacidade</button>
-            <button className="hover:text-white transition-colors">Termos de Uso</button>
-          </div>
         </div>
       </footer>
     </div>
   );
 }
-
-export default App;
