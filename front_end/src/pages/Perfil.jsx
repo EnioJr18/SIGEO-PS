@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { AlertTriangle, CheckCircle } from 'lucide-react';
 import { getPerfil, updatePerfil, deletePerfil } from '../api';
+import Button from '../components/ui/Button.jsx';
+import Input from '../components/ui/Input.jsx';
 import LoadingState from '../components/ui/LoadingState.jsx';
 
 export default function Perfil() {
@@ -98,25 +100,27 @@ export default function Perfil() {
             
             <form onSubmit={handleSalvarPerfil}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-2">Nome de Exibição</label>
-                  <input 
-                    type="text" name="first_name" value={perfil.first_name} onChange={handlePerfilChange} required
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none text-slate-700 bg-slate-50 focus:bg-white transition-all" 
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-2">E-mail de Contato</label>
-                  <input 
-                    type="email" name="email" value={perfil.email} onChange={handlePerfilChange} required
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none text-slate-700 bg-slate-50 focus:bg-white transition-all" 
-                  />
-                </div>
+                <Input
+                  label="Nome de Exibição"
+                  type="text"
+                  name="first_name"
+                  value={perfil.first_name}
+                  onChange={handlePerfilChange}
+                  required
+                />
+                <Input
+                  label="E-mail de Contato"
+                  type="email"
+                  name="email"
+                  value={perfil.email}
+                  onChange={handlePerfilChange}
+                  required
+                />
               </div>
               <div className="flex justify-end pt-4 border-t border-slate-100">
-                <button type="submit" className="px-8 py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-full shadow-md transition-all hover:-translate-y-0.5">
+                <Button type="submit" variant="secondary" size="lg" className="bg-slate-800 hover:bg-slate-700 text-white border-slate-800">
                   Salvar Alterações
-                </button>
+                </Button>
               </div>
             </form>
           </div>
@@ -127,12 +131,13 @@ export default function Perfil() {
             <p className="text-red-600/80 mb-6 max-w-xl text-sm">
               Ao excluir sua conta, todos os seus dados e histórico de acessos serão apagados permanentemente. Isso não pode ser desfeito.
             </p>
-            <button 
+            <Button
+              variant="danger"
+              size="lg"
               onClick={handleExcluirConta}
-              className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl transition-colors shadow-sm"
             >
               Excluir minha conta permanentemente
-            </button>
+            </Button>
           </div>
         </div>
 

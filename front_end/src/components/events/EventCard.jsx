@@ -21,6 +21,7 @@ export default function EventCard({ evento, onDetails, tone = 'emerald' }) {
     ? 'text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100'
     : 'text-emerald-600 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100';
   const titleClass = tone === 'blue' ? 'group-hover:text-blue-600' : 'group-hover:text-emerald-600';
+  const vagasLabel = evento.vagas ? `${evento.vagas} vagas` : 'Vagas a definir';
 
   return (
     <article
@@ -58,14 +59,15 @@ export default function EventCard({ evento, onDetails, tone = 'emerald' }) {
             </span>
             <span className="flex items-center gap-1.5 min-w-0">
               <Users aria-hidden="true" className="w-4 h-4 shrink-0 text-slate-400" />
-              <span className="truncate">{evento.vagas || 'Sem limite'} vagas</span>
+              <span className="truncate">{vagasLabel}</span>
             </span>
           </div>
 
           <button
             type="button"
             onClick={() => onDetails(evento)}
-            className={`w-full sm:w-auto px-4 py-2.5 rounded-full transition-colors text-sm font-bold ${colorClass}`}
+            aria-label={`Ver detalhes de ${evento.titulo}`}
+            className={`w-full sm:w-auto px-4 py-2.5 rounded-full transition-colors text-sm font-bold focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-emerald-500 ${colorClass}`}
           >
             Ver detalhes
           </button>

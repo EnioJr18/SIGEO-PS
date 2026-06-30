@@ -189,13 +189,18 @@ function EventMap({ eventos, isLoading, apiError, onViewDetails, onParticipar, i
       <div className={`bottom-sheet ${bottomSheetOpen ? 'open' : 'closed'}`}>
 
         {/* MOVA O BOTÃO PARA CÁ (DENTRO DA BOTTOM SHEET) */}
-        <button className="gps-fab" onClick={requestLocation} title="Minha localização">
+        <button className="gps-fab" onClick={requestLocation} title="Minha localização" aria-label="Usar minha localização">
           <LocateFixed aria-hidden="true" className="w-5 h-5" />
         </button>
 
-        <div className="sheet-drag-handle" onClick={() => setBottomSheetOpen(!bottomSheetOpen)}>
+        <button
+          type="button"
+          className="sheet-drag-handle"
+          onClick={() => setBottomSheetOpen(!bottomSheetOpen)}
+          aria-label={bottomSheetOpen ? 'Recolher lista de projetos' : 'Expandir lista de projetos'}
+        >
           <div className="handle-bar"></div>
-        </div>
+        </button>
         
         <div className="sheet-content">
           {isLoading && <p className="sheet-msg">Carregando projetos...</p>}

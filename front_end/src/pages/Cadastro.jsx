@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AlertTriangle, CheckCircle } from 'lucide-react';
+import Button from '../components/ui/Button.jsx';
+import Input from '../components/ui/Input.jsx';
 
 export default function Cadastro({ onSubmit, registerError, registerSuccess }) {
   const navigate = useNavigate();
@@ -62,21 +64,27 @@ export default function Cadastro({ onSubmit, registerError, registerSuccess }) {
         <form onSubmit={handleSubmit} className="space-y-5">
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <div>
-              <label className="block text-sm font-bold text-slate-700 mb-2">Usuário</label>
-              <input
-                name="username" type="text" value={form.username} onChange={handleChange} required placeholder="seu.usuario" autoComplete="username"
-                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none transition-all text-slate-700 bg-slate-50 focus:bg-white"
-              />
-            </div>
+            <Input
+              label="Usuário"
+              name="username"
+              type="text"
+              value={form.username}
+              onChange={handleChange}
+              required
+              placeholder="seu.usuario"
+              autoComplete="username"
+            />
             
-            <div>
-              <label className="block text-sm font-bold text-slate-700 mb-2">E-mail</label>
-              <input
-                name="email" type="email" value={form.email} onChange={handleChange} required placeholder="voce@email.com" autoComplete="email"
-                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none transition-all text-slate-700 bg-slate-50 focus:bg-white"
-              />
-            </div>
+            <Input
+              label="E-mail"
+              name="email"
+              type="email"
+              value={form.email}
+              onChange={handleChange}
+              required
+              placeholder="voce@email.com"
+              autoComplete="email"
+            />
             
             <div className="md:col-span-2">
               <label className="block text-sm font-bold text-slate-700 mb-2">Tipo de conta</label>
@@ -89,21 +97,27 @@ export default function Cadastro({ onSubmit, registerError, registerSuccess }) {
               </select>
             </div>
             
-            <div>
-              <label className="block text-sm font-bold text-slate-700 mb-2">Senha</label>
-              <input
-                name="password" type="password" value={form.password} onChange={handleChange} required placeholder="Crie uma senha" minLength="6"
-                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none transition-all text-slate-700 bg-slate-50 focus:bg-white"
-              />
-            </div>
+            <Input
+              label="Senha"
+              name="password"
+              type="password"
+              value={form.password}
+              onChange={handleChange}
+              required
+              placeholder="Crie uma senha"
+              minLength="6"
+            />
             
-            <div>
-              <label className="block text-sm font-bold text-slate-700 mb-2">Confirmar senha</label>
-              <input
-                name="confirmPassword" type="password" value={form.confirmPassword} onChange={handleChange} required placeholder="Repita a senha" minLength="6"
-                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none transition-all text-slate-700 bg-slate-50 focus:bg-white"
-              />
-            </div>
+            <Input
+              label="Confirmar senha"
+              name="confirmPassword"
+              type="password"
+              value={form.confirmPassword}
+              onChange={handleChange}
+              required
+              placeholder="Repita a senha"
+              minLength="6"
+            />
           </div>
 
           {/* Avisos de Erro / Sucesso */}
@@ -120,13 +134,14 @@ export default function Cadastro({ onSubmit, registerError, registerSuccess }) {
             </div>
           )}
 
-          <button 
+          <Button 
             type="submit" 
             disabled={isSubmitting} 
-            className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-md transition-all disabled:opacity-70 mt-2"
+            size="full"
+            className="mt-2"
           >
             {isSubmitting ? 'Criando conta...' : 'Criar minha conta'}
-          </button>
+          </Button>
         </form>
 
         {/* Links de Rodapé */}

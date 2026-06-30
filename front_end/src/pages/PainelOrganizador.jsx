@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ClipboardList, Edit3, Plus, Trash2, Users } from 'lucide-react';
 import { getInscricoesRecebidas, deleteEvento } from '../api';
+import Button from '../components/ui/Button.jsx';
 import EmptyState from '../components/ui/EmptyState.jsx';
 import LoadingState from '../components/ui/LoadingState.jsx';
 
@@ -73,13 +74,14 @@ export default function PainelOrganizador({ eventos }) {
               Gerencie seus projetos sociais e acompanhe os voluntários inscritos.
             </p>
           </div>
-          <button 
+          <Button
             onClick={() => navigate('/criar-evento')}
-            className="inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 px-6 rounded-xl shadow-md transition-all hover:-translate-y-0.5 whitespace-nowrap"
+            size="lg"
+            className="whitespace-nowrap"
           >
             <Plus aria-hidden="true" className="w-5 h-5" />
             Novo Projeto
-          </button>
+          </Button>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
@@ -102,7 +104,7 @@ export default function PainelOrganizador({ eventos }) {
               <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Ação principal</span>
               <Plus aria-hidden="true" className="w-5 h-5 text-emerald-600" />
             </div>
-            <button onClick={() => navigate('/criar-evento')} className="text-emerald-600 font-bold hover:underline">
+            <button onClick={() => navigate('/criar-evento')} className="text-emerald-600 font-bold hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 rounded">
               Publicar novo projeto
             </button>
           </div>
@@ -161,26 +163,31 @@ export default function PainelOrganizador({ eventos }) {
 
                     {/* Botões de Ação */}
                     <div className="col-span-12 md:col-span-4 flex items-center gap-2 mt-4 md:mt-0 justify-start md:justify-center">
-                      <button 
+                      <Button
                         onClick={() => navigate(`/painel/lista/${eventoId}`)}
-                        className="flex-1 md:flex-none px-3 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-lg transition-colors"
+                        size="sm"
+                        className="flex-1 md:flex-none bg-slate-900 hover:bg-slate-800"
                       >
                         Ver Lista
-                      </button>
-                      <button 
+                      </Button>
+                      <Button
                         onClick={() => navigate(`/editar-evento/${eventoId}`)}
-                        className="flex-1 md:flex-none px-3 py-2 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs font-bold rounded-lg transition-colors inline-flex items-center justify-center gap-1.5"
+                        variant="secondary"
+                        size="sm"
+                        className="flex-1 md:flex-none"
                       >
                         <Edit3 aria-hidden="true" className="w-3.5 h-3.5" />
                         Editar
-                      </button>
-                      <button 
+                      </Button>
+                      <Button
                         onClick={() => handleExcluir(eventoId, titulo)}
-                        className="px-3 py-2 bg-white border border-red-200 hover:bg-red-50 text-red-600 rounded-lg transition-colors"
+                        variant="secondary"
+                        size="sm"
+                        className="border-red-200 hover:bg-red-50 text-red-600"
                         aria-label="Excluir projeto"
                       >
                         <Trash2 aria-hidden="true" className="w-4 h-4" />
-                      </button>
+                      </Button>
                     </div>
 
                   </div>

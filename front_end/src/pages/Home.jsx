@@ -24,14 +24,16 @@ import {
 } from 'lucide-react';
 import EventMap from '../EventMap.jsx'; // Importando da pasta pai
 import EventCard from '../components/events/EventCard.jsx';
+import Button from '../components/ui/Button.jsx';
 import EmptyState from '../components/ui/EmptyState.jsx';
+import Input from '../components/ui/Input.jsx';
 import LoadingState from '../components/ui/LoadingState.jsx';
 
 const valueHighlights = [
-  { icon: Compass, label: 'Mapa interativo' },
-  { icon: Calendar, label: 'Agenda social' },
-  { icon: Users, label: 'Inscrições rápidas' },
-  { icon: Brain, label: 'Assistente de IA' },
+  { icon: Compass, label: 'Projetos no mapa' },
+  { icon: Calendar, label: 'Agenda organizada' },
+  { icon: Users, label: 'Inscrição simplificada' },
+  { icon: Brain, label: 'Apoio de IA' },
 ];
 
 const categories = [
@@ -70,45 +72,46 @@ export default function Home({
         <div className="container mx-auto max-w-5xl">
           <div className="inline-flex items-center gap-2 rounded-full bg-white/10 border border-white/15 px-4 py-2 text-sm font-semibold text-emerald-100 mb-6">
             <ShieldCheck aria-hidden="true" className="w-4 h-4 text-emerald-300" />
-            Projetos sociais, voluntariado e impacto local
+            Eventos sociais com localização, inscrição e apoio inteligente
           </div>
 
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white tracking-tight mb-6 max-w-4xl mx-auto leading-tight">
-            Conecte-se com Impacto Social <span className="text-emerald-400">Perto de Você</span>
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white tracking-tight mb-6 max-w-5xl mx-auto leading-tight">
+            Encontre projetos sociais <span className="text-emerald-400">perto de você</span>
           </h1>
-          <p className="text-lg md:text-xl text-emerald-100 mb-10 max-w-2xl mx-auto">
-            Descubra e participe de projetos sociais relevantes na sua comunidade. Faça a diferença onde ela mais importa.
+          <p className="text-lg md:text-xl text-emerald-100 mb-10 max-w-3xl mx-auto leading-relaxed">
+            Descubra eventos sociais por geolocalização, inscreva-se com poucos cliques e conte com a IA para encontrar oportunidades alinhadas ao seu perfil.
           </p>
 
           <form onSubmit={handleSearch} aria-label="Buscar projetos sociais" className="flex flex-col sm:flex-row gap-3 max-w-3xl mx-auto mb-8">
-            <div className="relative flex-1 flex items-center bg-white rounded-full shadow-lg focus-within:ring-4 focus-within:ring-emerald-500/50 transition-all">
-              <Search aria-hidden="true" className="absolute left-5 w-5 h-5 text-slate-400" />
-              <input 
-                type="search" 
-                placeholder="Encontre projetos sociais perto de você..." 
-                value={searchValue} 
-                onChange={(event) => setSearchValue(event.target.value)} 
-                className="w-full py-4 pl-12 pr-6 rounded-full outline-none text-slate-800 placeholder-slate-400 bg-transparent"
-              />
-            </div>
-            <button type="submit" className="bg-emerald-500 hover:bg-emerald-400 text-emerald-950 font-bold py-4 px-8 rounded-full shadow-lg transition-colors whitespace-nowrap">
+            <Input
+              id="home-search"
+              type="search"
+              icon={Search}
+              placeholder="Busque por nome, causa ou local..."
+              value={searchValue}
+              onChange={(event) => setSearchValue(event.target.value)}
+              className="flex-1"
+              inputClassName="rounded-full bg-white py-4 text-slate-800 shadow-lg focus:ring-4 focus:ring-emerald-500/50"
+              aria-label="Buscar projetos por nome, causa ou local"
+            />
+            <Button type="submit" size="lg" className="bg-emerald-500 hover:bg-emerald-400 text-emerald-950 whitespace-nowrap">
               Pesquisar
-            </button>
+            </Button>
           </form>
 
           <div className="flex flex-wrap items-center justify-center gap-4 mb-10">
-            <Link to="/projetos" className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-emerald-950 font-bold py-3 px-6 rounded-full shadow-md transition-colors">
+            <Button as={Link} to="/projetos" size="lg" className="bg-emerald-500 hover:bg-emerald-400 text-emerald-950">
               <ArrowRight aria-hidden="true" className="w-5 h-5" />
               Ver projetos
-            </Link>
-            <a href="#mapa" className="flex items-center gap-2 bg-emerald-800/50 hover:bg-emerald-700/50 text-white border border-emerald-500/30 font-bold py-3 px-6 rounded-full shadow-sm backdrop-blur-sm transition-all">
+            </Button>
+            <Button as="a" href="#mapa" variant="secondary" size="lg" className="bg-emerald-800/50 hover:bg-emerald-700/50 text-white border-emerald-500/30 shadow-sm backdrop-blur-sm">
               <Map aria-hidden="true" className="w-5 h-5" />
               Explorar mapa
-            </a>
-            <Link to="/criar-evento" className="flex items-center gap-2 bg-white hover:bg-slate-100 text-emerald-900 font-bold py-3 px-6 rounded-full shadow-md transition-colors">
+            </Button>
+            <Button as={Link} to="/criar-evento" variant="secondary" size="lg" className="bg-white hover:bg-slate-100 text-emerald-900">
               <Plus aria-hidden="true" className="w-5 h-5" />
               Cadastrar projeto
-            </Link>
+            </Button>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 max-w-4xl mx-auto">
@@ -132,7 +135,7 @@ export default function Home({
               Mapa Interativo de Projetos
             </h2>
             <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-              Veja iniciativas de impacto social acontecendo ao seu redor.
+              Veja no mapa onde as iniciativas acontecem e escolha projetos próximos da sua rotina.
             </p>
           </div>
           
@@ -167,10 +170,15 @@ export default function Home({
       {/* ========================================= */}
       <section id="categorias" className="py-12 bg-slate-50">
         <div className="container mx-auto px-4 max-w-6xl">
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-2xl md:text-3xl font-bold text-slate-800 tracking-tight">
-              Explore por Causas
-            </h2>
+          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-8">
+            <div>
+              <h2 className="text-2xl md:text-3xl font-bold text-slate-800 tracking-tight">
+                Explore por causas
+              </h2>
+              <p className="text-slate-500 mt-2">
+                Filtre rapidamente por áreas de atuação social.
+              </p>
+            </div>
           </div>
 
           <div className="flex overflow-x-auto pb-6 pt-2 -mx-4 px-4 md:mx-0 md:px-0 md:grid md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 snap-x snap-mandatory" style={{ scrollbarWidth: 'none' }}>
@@ -178,13 +186,14 @@ export default function Home({
               <button
                 key={value || 'todas'}
                 onClick={() => handleCategoryFilter(value)}
+                type="button"
                 className={`snap-start shrink-0 w-36 md:w-auto flex flex-col items-center justify-center p-5 rounded-2xl border shadow-sm hover:shadow-md hover:-translate-y-1 transition-all ${
                   active
                     ? 'bg-emerald-600 text-white border-emerald-600'
                     : 'bg-white text-slate-600 border-slate-200 hover:border-emerald-300 hover:text-emerald-600'
                 }`}
               >
-                <Icon aria-hidden="true" className="w-7 h-7 mb-3" />
+                <Icon aria-hidden="true" className="w-6 h-6 mb-3" />
                 <span className="font-semibold text-sm text-center">{label}</span>
               </button>
             ))}
@@ -203,10 +212,10 @@ export default function Home({
                 Projetos em Destaque
               </h2>
               <p className="text-lg text-slate-600">
-                As iniciativas que estão fazendo a diferença agora.
+                Iniciativas recentes para participar, acompanhar ou divulgar.
               </p>
             </div>
-            <button onClick={() => navigate("/projetos")} className="hidden md:inline-flex items-center gap-2 text-blue-600 font-bold hover:text-blue-700 hover:underline underline-offset-4 transition-all">
+            <button onClick={() => navigate("/projetos")} className="hidden md:inline-flex items-center gap-2 text-blue-600 font-bold hover:text-blue-700 hover:underline underline-offset-4 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded">
               Explorar todos
               <ArrowRight aria-hidden="true" className="w-5 h-5" />
             </button>
@@ -235,10 +244,10 @@ export default function Home({
 
           {!isLoading && eventos.length > 0 && (
           <div className="mt-12 text-center">
-            <button onClick={() => navigate("/projetos")} className="inline-flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 px-8 rounded-full shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all">
+            <Button onClick={() => navigate("/projetos")} variant="ghost" size="lg" className="bg-slate-900 hover:bg-slate-800 text-white shadow-lg hover:shadow-xl hover:-translate-y-1">
               Ver todos os projetos
               <ArrowRight aria-hidden="true" className="w-5 h-5" />
-            </button>
+            </Button>
           </div>
           )}
         </div>
@@ -367,12 +376,12 @@ export default function Home({
           </p>
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <a href="#mapa" className="w-full sm:w-auto bg-white text-emerald-950 hover:bg-slate-100 font-bold py-3 px-8 rounded-full shadow-md transition-colors">
+            <Button as="a" href="#mapa" variant="secondary" size="lg" className="w-full sm:w-auto bg-white text-emerald-950 hover:bg-slate-100">
               Encontrar projetos
-            </a>
-            <Link to="/criar-evento" className="w-full sm:w-auto bg-emerald-500 hover:bg-emerald-400 text-emerald-950 font-bold py-3 px-8 rounded-full shadow-md transition-colors">
+            </Button>
+            <Button as={Link} to="/criar-evento" size="lg" className="w-full sm:w-auto bg-emerald-500 hover:bg-emerald-400 text-emerald-950">
               Criar novo projeto
-            </Link>
+            </Button>
           </div>
 
         </div>

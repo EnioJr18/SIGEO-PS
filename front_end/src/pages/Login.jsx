@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AlertTriangle, CheckCircle, Home } from 'lucide-react';
+import Button from '../components/ui/Button.jsx';
+import Input from '../components/ui/Input.jsx';
 
 export default function Login({ onSubmit, loginError, loginSuccess }) {
   const [identifier, setIdentifier] = useState('');
@@ -35,31 +37,25 @@ export default function Login({ onSubmit, loginError, loginSuccess }) {
 
         {/* Formulário */}
         <form onSubmit={handleSubmit} className="space-y-5">
-          <div>
-            <label className="block text-sm font-bold text-slate-700 mb-2">E-mail ou usuário</label>
-            <input
-              type="text"
-              value={identifier}
-              onChange={(e) => setIdentifier(e.target.value)}
-              placeholder="você@email.com"
-              autoComplete="username"
-              required
-              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all text-slate-700 bg-slate-50 focus:bg-white"
-            />
-          </div>
+          <Input
+            label="E-mail ou usuário"
+            type="text"
+            value={identifier}
+            onChange={(e) => setIdentifier(e.target.value)}
+            placeholder="você@email.com"
+            autoComplete="username"
+            required
+          />
           
-          <div>
-            <label className="block text-sm font-bold text-slate-700 mb-2">Senha</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Digite sua senha"
-              autoComplete="current-password"
-              required
-              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all text-slate-700 bg-slate-50 focus:bg-white"
-            />
-          </div>
+          <Input
+            label="Senha"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Digite sua senha"
+            autoComplete="current-password"
+            required
+          />
 
           {/* Feedbacks de Erro e Sucesso */}
           {loginError && (
@@ -75,13 +71,14 @@ export default function Login({ onSubmit, loginError, loginSuccess }) {
             </div>
           )}
 
-          <button 
+          <Button 
             type="submit" 
             disabled={isSubmitting} 
-            className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-md transition-all disabled:opacity-70 mt-2"
+            size="full"
+            className="mt-2"
           >
             {isSubmitting ? 'Entrando...' : 'Entrar na plataforma'}
-          </button>
+          </Button>
         </form>
 
         {/* Links de Rodapé */}

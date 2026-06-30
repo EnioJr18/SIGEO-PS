@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Award, Home as HomeIcon, Menu, Sparkles, X } from "lucide-react";
+import { Home as HomeIcon, Menu, Sparkles, X } from "lucide-react";
 import { Routes, Route, useNavigate } from "react-router-dom"; 
 
 import "./App.css";
@@ -24,7 +24,7 @@ import DashboardImpacto from "./pages/DashboardImpacto.jsx";
 import PainelOrganizador from "./pages/PainelOrganizador.jsx";
 import ListaInscritos from './pages/ListaInscritos';
 import PainelParticipante from './pages/PainelParticipante';
-import Perfil from './pages/Perfil'; // Nossa nova tela universal
+import Perfil from './pages/Perfil';
 import Chatbot from './Chatbot';
 
 export default function App() {
@@ -237,9 +237,6 @@ export default function App() {
                     {userRole}
                   </span>
                 </div>
-                <div className="flex items-center gap-1.5 px-3 py-1 bg-amber-400 text-amber-900 rounded-full text-xs font-bold shadow-sm">
-                  <Award aria-hidden="true" className="w-4 h-4" /> Cidadão
-                </div>
               </div>
             )}
 
@@ -307,9 +304,44 @@ export default function App() {
       {/* ==========================================
           RODAPÉ
       ========================================== */}
-      <footer className="footer bg-slate-950 text-slate-400 pt-16 pb-8 px-4 border-t border-slate-800">
-        <div className="container mx-auto max-w-6xl flex flex-col md:flex-row items-center justify-between text-xs">
-          <p>© 2026 SIGEO-PS. Todos os direitos reservados.</p>
+      <footer className="footer bg-slate-950 text-slate-400 px-4 border-t border-slate-800">
+        <div className="container mx-auto max-w-6xl py-10 md:py-12">
+          <div className="flex flex-col gap-8 md:flex-row md:items-start md:justify-between">
+            <div className="max-w-md">
+              <button
+                type="button"
+                onClick={() => navigate("/")}
+                className="inline-flex items-center gap-2 text-lg font-extrabold text-white hover:text-blue-300 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 rounded-md"
+                aria-label="Voltar para a página inicial do SIGEO-PS"
+              >
+                <HomeIcon aria-hidden="true" className="w-5 h-5 text-blue-400" />
+                <span>SIGEO-PS</span>
+              </button>
+              <p className="footer-description mt-3 text-sm leading-6 text-slate-400">
+                Sistema de Informação Geográfica para conectar projetos sociais, participantes e organizadores.
+              </p>
+            </div>
+
+            <nav className="grid grid-cols-2 gap-x-10 gap-y-3 text-sm md:text-right" aria-label="Links do rodapé">
+              <button type="button" onClick={() => navigate("/")} className="text-left md:text-right text-slate-400 hover:text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 rounded">
+                Início
+              </button>
+              <button type="button" onClick={() => navigate("/projetos")} className="text-left md:text-right text-slate-400 hover:text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 rounded">
+                Projetos
+              </button>
+              <button type="button" onClick={() => navigate("/dashboard")} className="text-left md:text-right text-slate-400 hover:text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 rounded">
+                Impacto Social
+              </button>
+              <button type="button" onClick={() => navigate(isAuthenticated ? "/perfil" : "/login")} className="text-left md:text-right text-slate-400 hover:text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 rounded">
+                {isAuthenticated ? "Perfil" : "Entrar"}
+              </button>
+            </nav>
+          </div>
+
+          <div className="footer-bottom mt-8 pt-5 border-t border-slate-800 flex flex-col gap-2 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between">
+            <p>© 2026 SIGEO-PS. Todos os direitos reservados.</p>
+            <p>Projetos sociais com dados, localização e participação cidadã.</p>
+          </div>
         </div>
       </footer>
     </div>

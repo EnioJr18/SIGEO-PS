@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Users } from 'lucide-react';
+import { Calendar, Mail, Users } from 'lucide-react';
 import { getInscricoesRecebidas } from '../api';
+import Button from '../components/ui/Button.jsx';
 import EmptyState from '../components/ui/EmptyState.jsx';
 import LoadingState from '../components/ui/LoadingState.jsx';
 
@@ -28,12 +29,15 @@ const ListaInscritos = () => {
   }, [id]);
 
   return (
-    <div className="max-w-4xl mx-auto mt-10 p-6 bg-white rounded-3xl shadow-sm border border-slate-100">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-extrabold text-slate-800">Voluntários Inscritos</h2>
-        <button onClick={() => navigate(-1)} className="px-4 py-2 bg-slate-100 text-slate-600 rounded-lg font-bold hover:bg-slate-200">
+    <div className="max-w-4xl mx-auto mt-10 p-4 sm:p-6 bg-white rounded-3xl shadow-sm border border-slate-100">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
+        <div>
+          <h2 className="text-2xl font-extrabold text-slate-800">Voluntários Inscritos</h2>
+          <p className="text-sm text-slate-500 mt-1">Acompanhe participantes confirmados neste projeto.</p>
+        </div>
+        <Button onClick={() => navigate(-1)} variant="ghost" size="md">
           Voltar
-        </button>
+        </Button>
       </div>
 
       {loading ? (
@@ -46,7 +50,33 @@ const ListaInscritos = () => {
           className="bg-slate-50 border-dashed shadow-none"
         />
       ) : (
-        <div className="overflow-x-auto">
+        <>
+        <div className="grid gap-3 md:hidden">
+          {inscritos.map((insc) => (
+            <div key={insc.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-lg shrink-0">
+                  {insc.participante_nome ? insc.participante_nome.charAt(0).toUpperCase() : 'V'}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-slate-800 font-bold truncate">
+                    {insc.participante_nome || `Inscrição #${insc.id}`}
+                  </p>
+                  <p className="text-slate-500 text-sm flex items-center gap-1.5 mt-1 truncate">
+                    <Mail aria-hidden="true" className="w-4 h-4 shrink-0" />
+                    {insc.participante_email || 'E-mail não informado'}
+                  </p>
+                  <p className="text-slate-500 text-sm flex items-center gap-1.5 mt-1">
+                    <Calendar aria-hidden="true" className="w-4 h-4 shrink-0" />
+                    {new Date(insc.data_inscricao).toLocaleDateString('pt-BR')}
+                  </p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="hidden md:block overflow-x-auto">
          <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-200">
@@ -101,6 +131,7 @@ const ListaInscritos = () => {
             </tbody>
           </table>
         </div>
+        </>
       )}
     </div>
   );

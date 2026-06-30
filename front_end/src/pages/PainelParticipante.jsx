@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { AlertTriangle, Calendar, CalendarDays, CalendarX, CheckCircle, Clock3, History, Settings, Sprout } from 'lucide-react';
+import { AlertTriangle, Calendar, CalendarDays, CalendarX, CheckCircle, Clock3, History, Settings, Sprout, Star } from 'lucide-react';
 import { cancelarInscricao, getPerfil, updatePerfil, deletePerfil, getMinhasInscricoes } from '../api';
+import Button from '../components/ui/Button.jsx';
 import EmptyState from '../components/ui/EmptyState.jsx';
 import LoadingState from '../components/ui/LoadingState.jsx';
 
@@ -236,12 +237,13 @@ export default function PainelParticipante() {
                     </p>
                   </div>
                   {insc.status !== 'cancelada' && (
-                    <button
+                    <Button
                       onClick={() => handleCancelarInscricao(insc)}
-                      className="px-5 py-2.5 text-sm font-bold text-red-600 hover:bg-red-50 rounded-xl border border-red-200 transition-colors"
+                      variant="secondary"
+                      className="border-red-200 hover:bg-red-50 text-red-600"
                     >
                       Cancelar inscrição
-                    </button>
+                    </Button>
                   )}
                 </div>
               ))
@@ -271,9 +273,10 @@ export default function PainelParticipante() {
                     <p className="text-slate-500 mt-1">Realizado em: {new Date(insc.evento_data).toLocaleDateString('pt-BR')}</p>
                   </div>
                   {/* Botão de avaliar (que implementaremos no futuro) */}
-                  <button className="px-5 py-2.5 text-sm font-bold bg-amber-100 text-amber-700 hover:bg-amber-200 rounded-xl transition-colors">
-                    ⭐ Avaliar Evento
-                  </button>
+                  <Button type="button" variant="secondary" className="bg-amber-100 text-amber-700 hover:bg-amber-200 border-amber-100">
+                    <Star aria-hidden="true" className="w-4 h-4" />
+                    Avaliar Evento
+                  </Button>
                 </div>
               ))
             )}
@@ -306,9 +309,9 @@ export default function PainelParticipante() {
                   </div>
                 </div>
                 <div className="flex justify-end">
-                  <button type="submit" className="px-8 py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-full shadow-md transition-all">
+                  <Button type="submit" variant="secondary" size="lg" className="bg-slate-800 hover:bg-slate-700 text-white border-slate-800">
                     Salvar Alterações
-                  </button>
+                  </Button>
                 </div>
               </form>
             </div>
@@ -319,12 +322,13 @@ export default function PainelParticipante() {
               <p className="text-red-600/80 mb-6 max-w-xl">
                 Ao excluir sua conta, todos os seus dados, histórico de inscrições e acessos serão apagados permanentemente. Isso não pode ser desfeito.
               </p>
-              <button 
+              <Button
+                variant="danger"
+                size="lg"
                 onClick={handleExcluirConta}
-                className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl transition-colors shadow-sm"
               >
                 Excluir minha conta permanentemente
-              </button>
+              </Button>
             </div>
           </div>
         )}

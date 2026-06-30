@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import AddressAutocomplete from '../AddressAutocomplete.jsx';
 import { useNavigate, useParams } from 'react-router-dom';
+import { AlertTriangle, CheckCircle } from 'lucide-react';
 import { createEvento, updateEvento, getEvento } from '../api';
+import Button from '../components/ui/Button.jsx';
 import LoadingState from '../components/ui/LoadingState.jsx';
 
 export default function CriarEvento() {
@@ -220,29 +222,31 @@ export default function CriarEvento() {
 
             {createError && (
               <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-600 rounded-xl flex items-start gap-3">
-                <span aria-hidden="true" className="text-lg">⚠️</span>
+                <AlertTriangle aria-hidden="true" className="w-5 h-5 shrink-0" />
                 <p className="text-sm font-medium">{createError}</p>
               </div>
             )}
             {createSuccess && (
               <div className="mb-6 p-4 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl flex items-start gap-3">
-                <span aria-hidden="true" className="text-lg">✅</span>
+                <CheckCircle aria-hidden="true" className="w-5 h-5 shrink-0" />
                 <p className="text-sm font-medium">{createSuccess}</p>
               </div>
             )}
 
             <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-4 pt-6 border-t border-slate-100">
-              <button 
+              <Button
                 type="button" 
                 onClick={() => navigate('/painel')} 
-                className="w-full sm:w-auto px-6 py-3 text-center font-bold text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-full transition-colors"
+                variant="ghost"
+                size="lg"
+                className="w-full sm:w-auto"
               >
                 Cancelar
-              </button>
+              </Button>
               {/* O Botão também muda! */}
-              <button type="submit" className="w-full sm:w-auto px-8 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-full shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all">
+              <Button type="submit" size="lg" className="w-full sm:w-auto">
                 {isEditMode ? "Salvar Alterações" : "Publicar Projeto"}
-              </button>
+              </Button>
             </div>
             
           </form>
