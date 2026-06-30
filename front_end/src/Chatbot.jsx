@@ -1,60 +1,122 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import { AlertCircle, Bot, Send, X } from 'lucide-react';
+import { sendChatMessage } from './api';
 
 const Chatbot = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [message, setMessage] = useState('');
+  const [messages, setMessages] = useState([
+    {
+      role: 'assistant',
+      text: 'Olá! Eu sou a inteligência artificial do SIGEO-PS. Posso ajudar com dúvidas sobre voluntariado, projetos sociais e uso da plataforma.',
+    },
+  ]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    const text = message.trim();
+    if (!text || isLoading) return;
+
+    setMessages((current) => [...current, { role: 'user', text }]);
+    setMessage('');
+    setErrorMessage('');
+    setIsLoading(true);
+
+    try {
+      const data = await sendChatMessage(text);
+      setMessages((current) => [
+        ...current,
+        { role: 'assistant', text: data?.response || 'Não consegui gerar uma resposta agora.' },
+      ]);
+    } catch {
+      setErrorMessage('Não foi possível falar com a IA agora. Tente novamente em instantes.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
-    <div className="fixed bottom-6 right-6 z-[200]">
+    <div className="fixed bottom-5 right-4 left-4 sm:left-auto sm:bottom-6 sm:right-6 z-[200] pointer-events-none">
       {/* Se estiver aberto, mostra a janela do chat */}
       {isOpen ? (
-        <div className="bg-white w-80 sm:w-96 h-[400px] rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-slate-200 animate-[translate-y-0_0.2s_ease-out]">
+        <div className="bg-white w-full sm:w-96 h-[min(520px,calc(100vh-7rem))] rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-slate-200 animate-[translate-y-0_0.2s_ease-out] pointer-events-auto">
           
           {/* Cabeçalho */}
-          <div className="bg-slate-900 text-white p-4 flex justify-between items-center shadow-md z-10">
-            <span className="font-bold flex items-center gap-2">
-              <span className="text-xl" aria-hidden="true">🤖</span> Assistente de IA
-            </span>
+          <div className="bg-gradient-to-r from-slate-900 to-emerald-900 text-white p-4 flex justify-between items-center shadow-md z-10">
+            <div>
+              <span className="font-bold flex items-center gap-2">
+                <Bot aria-hidden="true" className="w-5 h-5" /> Assistente de IA
+              </span>
+              <p className="text-xs text-emerald-100 mt-1">Ajuda rápida sobre projetos e voluntariado</p>
+            </div>
             <button 
               onClick={() => setIsOpen(false)} 
               className="text-slate-400 hover:text-white transition-colors"
               aria-label="Fechar chat"
             >
-              <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+              <X aria-hidden="true" className="w-5 h-5" />
             </button>
           </div>
 
-          {/* Área de Mensagens (Vazia por enquanto) */}
           <div className="flex-1 p-4 bg-slate-50 overflow-y-auto flex flex-col gap-3">
-            <div className="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm text-sm text-slate-700 max-w-[85%] border border-slate-100">
-              Olá! 👋 Eu sou a Inteligência Artificial do sistema. Em breve estarei conectada ao servidor para tirar todas as suas dúvidas.
-            </div>
+            {messages.map((item, index) => (
+              <div
+                key={`${item.role}-${index}`}
+                className={`p-3 rounded-2xl shadow-sm text-sm max-w-[85%] border ${
+                  item.role === 'user'
+                    ? 'bg-emerald-600 text-white border-emerald-600 rounded-tr-none self-end'
+                    : 'bg-white text-slate-700 border-slate-100 rounded-tl-none self-start'
+                }`}
+              >
+                {item.text}
+              </div>
+            ))}
+
+            {isLoading && (
+              <div className="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm text-sm text-slate-500 max-w-[85%] border border-slate-100 self-start">
+                Pensando...
+              </div>
+            )}
+
+            {errorMessage && (
+              <div className="flex items-start gap-2 text-sm text-red-600 bg-red-50 border border-red-100 p-3 rounded-2xl">
+                <AlertCircle aria-hidden="true" className="w-4 h-4 mt-0.5 shrink-0" />
+                <span>{errorMessage}</span>
+              </div>
+            )}
           </div>
 
-          {/* Área de Digitação (Desativada por enquanto) */}
-          <div className="p-3 border-t border-slate-100 bg-white flex gap-2 items-center">
+          <form onSubmit={handleSubmit} className="p-3 border-t border-slate-100 bg-white flex gap-2 items-center">
             <input 
               type="text" 
-              placeholder="A IA ainda está dormindo..." 
+              value={message}
+              onChange={(event) => setMessage(event.target.value)}
+              placeholder="Digite sua dúvida..." 
+              aria-label="Mensagem para o assistente de IA"
               className="flex-1 bg-slate-100 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300 disabled:opacity-60 disabled:cursor-not-allowed" 
-              disabled 
+              disabled={isLoading}
             />
             <button 
-              className="bg-emerald-600 text-white p-2 rounded-full w-10 h-10 flex items-center justify-center cursor-not-allowed opacity-50"
-              disabled
+              type="submit"
+              className="bg-emerald-600 hover:bg-emerald-500 text-white p-2 rounded-full w-10 h-10 flex items-center justify-center disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+              disabled={isLoading || !message.trim()}
+              aria-label="Enviar mensagem"
             >
-              <svg className="w-4 h-4 fill-current transform rotate-45 mb-1 mr-1" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+              <Send aria-hidden="true" className="w-4 h-4 transform rotate-45 mb-1 mr-1" />
             </button>
-          </div>
+          </form>
 
         </div>
       ) : (
         /* Se estiver fechado, mostra o botão flutuante */
         <button
           onClick={() => setIsOpen(true)}
-          className="bg-slate-900 hover:bg-slate-800 text-white w-14 h-14 rounded-full shadow-2xl flex items-center justify-center transition-transform hover:scale-110 hover:-translate-y-1"
+          className="ml-auto bg-slate-900 hover:bg-slate-800 text-white w-14 h-14 rounded-full shadow-2xl flex items-center justify-center transition-transform hover:scale-110 hover:-translate-y-1 pointer-events-auto"
           aria-label="Abrir assistente virtual"
         >
-          <span className="text-3xl drop-shadow-md">🤖</span>
+          <Bot aria-hidden="true" className="w-8 h-8 drop-shadow-md" />
         </button>
       )}
     </div>

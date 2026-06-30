@@ -1,16 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { AlertTriangle, CheckCircle } from 'lucide-react';
 import { getPerfil, updatePerfil, deletePerfil } from '../api';
+import LoadingState from '../components/ui/LoadingState.jsx';
 
 export default function Perfil() {
-  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [mensagem, setMensagem] = useState({ tipo: '', texto: '' });
   const [perfil, setPerfil] = useState({ first_name: '', email: '' });
-
-  useEffect(() => {
-    carregarDados();
-  }, []);
 
   const carregarDados = async () => {
     try {
@@ -19,12 +15,17 @@ export default function Perfil() {
         first_name: dados.first_name || '',
         email: dados.email || ''
       });
-    } catch (error) {
+    } catch {
       setMensagem({ tipo: 'erro', texto: 'Não foi possível carregar suas informações.' });
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    const timer = setTimeout(carregarDados, 0);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handlePerfilChange = (e) => {
     setPerfil({ ...perfil, [e.target.name]: e.target.value });
@@ -42,7 +43,7 @@ export default function Perfil() {
       
       // Um pequeno delay e recarregamos a página para o React puxar o nome novo lá em cima
       setTimeout(() => window.location.reload(), 1000);
-    } catch (error) {
+    } catch {
       setMensagem({ tipo: 'erro', texto: 'Erro ao atualizar o perfil.' });
     }
   };
@@ -58,7 +59,7 @@ export default function Perfil() {
         localStorage.clear();
         alert("Conta excluída. Esperamos ver você de novo no futuro!");
         window.location.assign('/'); 
-      } catch (error) {
+      } catch {
         setMensagem({ tipo: 'erro', texto: 'Erro ao tentar excluir a conta.' });
       }
     }
@@ -67,7 +68,7 @@ export default function Perfil() {
   if (loading) {
     return (
       <div className="py-16 bg-slate-50 min-h-screen flex items-center justify-center">
-        <p className="text-xl font-bold text-slate-500">Carregando seu perfil...</p>
+        <LoadingState text="Carregando seu perfil..." />
       </div>
     );
   }
@@ -83,7 +84,9 @@ export default function Perfil() {
 
         {mensagem.texto && (
           <div className={`mb-6 p-4 rounded-xl flex items-start gap-3 border ${mensagem.tipo === 'erro' ? 'bg-red-50 border-red-200 text-red-600' : 'bg-emerald-50 border-emerald-200 text-emerald-700'}`}>
-            <span aria-hidden="true" className="text-lg">{mensagem.tipo === 'erro' ? '⚠️' : '✅'}</span>
+            {mensagem.tipo === 'erro'
+              ? <AlertTriangle aria-hidden="true" className="w-5 h-5 shrink-0" />
+              : <CheckCircle aria-hidden="true" className="w-5 h-5 shrink-0" />}
             <p className="text-sm font-medium">{mensagem.texto}</p>
           </div>
         )}

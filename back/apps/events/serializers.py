@@ -143,9 +143,6 @@ class InscricaoSerializer(serializers.ModelSerializer):
     def get_participante_email(self, obj):
         return obj.participante.email or "E-mail não cadastrado"
 
-    def get_participante_email(self, obj):
-        return obj.participante.email or "E-mail não cadastrado"
-
     def create(self, validated_data):
         evento = validated_data['evento']
         participante = validated_data['participante']

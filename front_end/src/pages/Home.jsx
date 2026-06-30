@@ -1,6 +1,50 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import {
+  ArrowRight,
+  BookOpen,
+  Brain,
+  Calendar,
+  CircleDot,
+  Code2,
+  Compass,
+  HandHeart,
+  HeartPulse,
+  Leaf,
+  Link as LinkIcon,
+  Map,
+  MapPin,
+  Palette,
+  PawPrint,
+  Plus,
+  Search,
+  SearchX,
+  ShieldCheck,
+  Users,
+  X,
+} from 'lucide-react';
 import EventMap from '../EventMap.jsx'; // Importando da pasta pai
+import EventCard from '../components/events/EventCard.jsx';
+import EmptyState from '../components/ui/EmptyState.jsx';
+import LoadingState from '../components/ui/LoadingState.jsx';
+
+const valueHighlights = [
+  { icon: Compass, label: 'Mapa interativo' },
+  { icon: Calendar, label: 'Agenda social' },
+  { icon: Users, label: 'Inscrições rápidas' },
+  { icon: Brain, label: 'Assistente de IA' },
+];
+
+const categories = [
+  { value: '', label: 'Todas', icon: CircleDot },
+  { value: 'educacao', label: 'Educação', icon: BookOpen },
+  { value: 'saude', label: 'Saúde', icon: HeartPulse },
+  { value: 'tecnologia', label: 'Tecnologia', icon: Code2 },
+  { value: 'meio_ambiente', label: 'Meio Ambiente', icon: Leaf },
+  { value: 'causa_animal', label: 'Causa Animal', icon: PawPrint },
+  { value: 'assistencia_social', label: 'Assistência Social', icon: HandHeart },
+  { value: 'cultura', label: 'Cultura', icon: Palette },
+  { value: 'outro', label: 'Outros', icon: ShieldCheck },
+];
 
 export default function Home({
   eventos,
@@ -22,20 +66,23 @@ export default function Home({
       {/* ========================================= */}
       {/* HERO SECTION                              */}
       {/* ========================================= */}
-      <section className="bg-gradient-to-b from-slate-900 to-emerald-900 py-16 md:py-24 px-4 text-center shadow-inner">
-        <div className="container mx-auto max-w-4xl">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white tracking-tight mb-6">
+      <section className="bg-gradient-to-b from-slate-950 via-slate-900 to-emerald-900 py-16 md:py-24 px-4 text-center shadow-inner">
+        <div className="container mx-auto max-w-5xl">
+          <div className="inline-flex items-center gap-2 rounded-full bg-white/10 border border-white/15 px-4 py-2 text-sm font-semibold text-emerald-100 mb-6">
+            <ShieldCheck aria-hidden="true" className="w-4 h-4 text-emerald-300" />
+            Projetos sociais, voluntariado e impacto local
+          </div>
+
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white tracking-tight mb-6 max-w-4xl mx-auto leading-tight">
             Conecte-se com Impacto Social <span className="text-emerald-400">Perto de Você</span>
           </h1>
           <p className="text-lg md:text-xl text-emerald-100 mb-10 max-w-2xl mx-auto">
             Descubra e participe de projetos sociais relevantes na sua comunidade. Faça a diferença onde ela mais importa.
           </p>
 
-          <form onSubmit={handleSearch} aria-label="Buscar projetos sociais" className="flex flex-col sm:flex-row gap-3 max-w-2xl mx-auto mb-10">
+          <form onSubmit={handleSearch} aria-label="Buscar projetos sociais" className="flex flex-col sm:flex-row gap-3 max-w-3xl mx-auto mb-8">
             <div className="relative flex-1 flex items-center bg-white rounded-full shadow-lg focus-within:ring-4 focus-within:ring-emerald-500/50 transition-all">
-              <svg viewBox="0 0 24 24" aria-hidden="true" className="absolute left-5 w-5 h-5 fill-slate-400">
-                <path d="M10.8 18a7.2 7.2 0 1 1 5.1-12.3 7.2 7.2 0 0 1 0 10.2l4.1 4.1-1.5 1.5-4.1-4.1A7.1 7.1 0 0 1 10.8 18Zm0-2.2a5 5 0 1 0 0-10 5 5 0 0 0 0 10Z" />
-              </svg>
+              <Search aria-hidden="true" className="absolute left-5 w-5 h-5 text-slate-400" />
               <input 
                 type="search" 
                 placeholder="Encontre projetos sociais perto de você..." 
@@ -49,19 +96,28 @@ export default function Home({
             </button>
           </form>
 
-          <div className="flex flex-wrap items-center justify-center gap-4">
+          <div className="flex flex-wrap items-center justify-center gap-4 mb-10">
+            <Link to="/projetos" className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-emerald-950 font-bold py-3 px-6 rounded-full shadow-md transition-colors">
+              <ArrowRight aria-hidden="true" className="w-5 h-5" />
+              Ver projetos
+            </Link>
             <a href="#mapa" className="flex items-center gap-2 bg-emerald-800/50 hover:bg-emerald-700/50 text-white border border-emerald-500/30 font-bold py-3 px-6 rounded-full shadow-sm backdrop-blur-sm transition-all">
-              <svg viewBox="0 0 24 24" aria-hidden="true" className="w-5 h-5 fill-current">
-                <path d="m15 19-6-2.1-4 1.6V6l4-1.6 6 2.1 4-1.6v12.5L15 19Zm-5.2-4 4.4 1.5V8.4L9.8 6.9V15Z" />
-              </svg>
+              <Map aria-hidden="true" className="w-5 h-5" />
               Explorar mapa
             </a>
-            <a href="/cadastrar-evento" className="flex items-center gap-2 bg-white hover:bg-slate-100 text-emerald-900 font-bold py-3 px-6 rounded-full shadow-md transition-colors">
-              <svg viewBox="0 0 24 24" aria-hidden="true" className="w-5 h-5 fill-current">
-                <path d="M11 13H5v-2h6V5h2v6h6v2h-6v6h-2v-6Z" />
-              </svg>
+            <Link to="/criar-evento" className="flex items-center gap-2 bg-white hover:bg-slate-100 text-emerald-900 font-bold py-3 px-6 rounded-full shadow-md transition-colors">
+              <Plus aria-hidden="true" className="w-5 h-5" />
               Cadastrar projeto
-            </a>
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 max-w-4xl mx-auto">
+            {valueHighlights.map(({ icon: Icon, label }) => (
+              <div key={label} className="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-emerald-50 backdrop-blur-sm">
+                <Icon aria-hidden="true" className="w-5 h-5 mx-auto mb-2 text-emerald-300" />
+                <span className="text-sm font-semibold">{label}</span>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -118,42 +174,20 @@ export default function Home({
           </div>
 
           <div className="flex overflow-x-auto pb-6 pt-2 -mx-4 px-4 md:mx-0 md:px-0 md:grid md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 snap-x snap-mandatory" style={{ scrollbarWidth: 'none' }}>
-            <button onClick={() => handleCategoryFilter('')} className="snap-start shrink-0 w-36 md:w-auto flex flex-col items-center justify-center p-6 rounded-2xl bg-emerald-600 text-white shadow-md hover:-translate-y-1 transition-transform">
-              <span className="text-3xl mb-3">🌍</span>
-              <span className="font-semibold text-sm">Todas</span>
-            </button>
-            <button onClick={() => handleCategoryFilter('educacao')} className="snap-start shrink-0 w-36 md:w-auto flex flex-col items-center justify-center p-6 rounded-2xl bg-white text-slate-600 border border-slate-200 shadow-sm hover:shadow-md hover:border-emerald-300 hover:text-emerald-600 hover:-translate-y-1 transition-all">
-              <span className="text-3xl mb-3">📚</span>
-              <span className="font-semibold text-sm">Educação</span>
-            </button>
-            <button onClick={() => handleCategoryFilter('saude')} className="snap-start shrink-0 w-36 md:w-auto flex flex-col items-center justify-center p-6 rounded-2xl bg-white text-slate-600 border border-slate-200 shadow-sm hover:shadow-md hover:border-emerald-300 hover:text-emerald-600 hover:-translate-y-1 transition-all">
-              <span className="text-3xl mb-3">❤️</span>
-              <span className="font-semibold text-sm">Saúde</span>
-            </button>
-            <button onClick={() => handleCategoryFilter('tecnologia')} className="snap-start shrink-0 w-36 md:w-auto flex flex-col items-center justify-center p-6 rounded-2xl bg-white text-slate-600 border border-slate-200 shadow-sm hover:shadow-md hover:border-emerald-300 hover:text-emerald-600 hover:-translate-y-1 transition-all">
-              <span className="text-3xl mb-3">💻</span>
-              <span className="font-semibold text-sm">Tecnologia</span>
-            </button>
-            <button onClick={() => handleCategoryFilter('meio_ambiente')} className="snap-start shrink-0 w-36 md:w-auto flex flex-col items-center justify-center p-6 rounded-2xl bg-white text-slate-600 border border-slate-200 shadow-sm hover:shadow-md hover:border-emerald-300 hover:text-emerald-600 hover:-translate-y-1 transition-all">
-              <span className="text-3xl mb-3">🌱</span>
-              <span className="font-semibold text-sm">Meio Ambiente</span>
-            </button>
-            <button onClick={() => handleCategoryFilter('causa_animal')} className="snap-start shrink-0 w-36 md:w-auto flex flex-col items-center justify-center p-6 rounded-2xl bg-white text-slate-600 border border-slate-200 shadow-sm hover:shadow-md hover:border-emerald-300 hover:text-emerald-600 hover:-translate-y-1 transition-all">
-              <span className="text-3xl mb-3">🐾</span>
-              <span className="font-semibold text-sm text-center">Causa Animal</span>
-            </button>
-            <button onClick={() => handleCategoryFilter('assistencia_social')} className="snap-start shrink-0 w-36 md:w-auto flex flex-col items-center justify-center p-6 rounded-2xl bg-white text-slate-600 border border-slate-200 shadow-sm hover:shadow-md hover:border-emerald-300 hover:text-emerald-600 hover:-translate-y-1 transition-all">
-              <span className="text-3xl mb-3">🤝</span>
-              <span className="font-semibold text-sm text-center">Assistência Social</span>
-            </button>
-            <button onClick={() => handleCategoryFilter('cultura')} className="snap-start shrink-0 w-36 md:w-auto flex flex-col items-center justify-center p-6 rounded-2xl bg-white text-slate-600 border border-slate-200 shadow-sm hover:shadow-md hover:border-emerald-300 hover:text-emerald-600 hover:-translate-y-1 transition-all">
-              <span className="text-3xl mb-3">🎭</span>
-              <span className="font-semibold text-sm">Cultura</span>
-            </button>
-            <button onClick={() => handleCategoryFilter('outro')} className="snap-start shrink-0 w-36 md:w-auto flex flex-col items-center justify-center p-6 rounded-2xl bg-white text-slate-600 border border-slate-200 shadow-sm hover:shadow-md hover:border-emerald-300 hover:text-emerald-600 hover:-translate-y-1 transition-all">
-              <span className="text-3xl mb-3">📌</span>
-              <span className="font-semibold text-sm">Outros</span>
-            </button>
+            {categories.map(({ value, label, icon: Icon, active }) => (
+              <button
+                key={value || 'todas'}
+                onClick={() => handleCategoryFilter(value)}
+                className={`snap-start shrink-0 w-36 md:w-auto flex flex-col items-center justify-center p-5 rounded-2xl border shadow-sm hover:shadow-md hover:-translate-y-1 transition-all ${
+                  active
+                    ? 'bg-emerald-600 text-white border-emerald-600'
+                    : 'bg-white text-slate-600 border-slate-200 hover:border-emerald-300 hover:text-emerald-600'
+                }`}
+              >
+                <Icon aria-hidden="true" className="w-7 h-7 mb-3" />
+                <span className="font-semibold text-sm text-center">{label}</span>
+              </button>
+            ))}
           </div>
         </div>
       </section>
@@ -174,52 +208,39 @@ export default function Home({
             </div>
             <button onClick={() => navigate("/projetos")} className="hidden md:inline-flex items-center gap-2 text-blue-600 font-bold hover:text-blue-700 hover:underline underline-offset-4 transition-all">
               Explorar todos
-              <svg viewBox="0 0 24 24" className="w-5 h-5 fill-current" aria-hidden="true"><path d="M5 13h11.17l-4.88 4.88c-.39.39-.39 1.03 0 1.42.39.39 1.02.39 1.41 0l6.59-6.59a.996.996 0 0 0 0-1.41l-6.58-6.6a.996.996 0 1 0-1.41 1.41L16.17 11H5c-.55 0-1 .45-1 1s.45 1 1 1z"/></svg>
+              <ArrowRight aria-hidden="true" className="w-5 h-5" />
             </button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {eventos.slice(0, 6).map((evento) => (
-              <div key={evento.id} id={`evento-card-${evento.id}`} className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl border border-slate-100 transition-all duration-300 group flex flex-col h-full hover:-translate-y-1">
-                <div className={`relative h-40 flex items-start justify-end p-4 ${
-                  evento.id % 3 === 0 ? 'bg-gradient-to-br from-emerald-400 to-teal-600' : 
-                  evento.id % 2 === 0 ? 'bg-gradient-to-br from-blue-400 to-indigo-600' : 
-                  'bg-gradient-to-br from-orange-400 to-rose-500'
-                }`}>
-                  <span className="bg-white/90 backdrop-blur-sm text-slate-800 text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wider shadow-sm">
-                    {evento.categoria}
-                  </span>
-                </div>
-                <div className="p-6 flex flex-col flex-grow">
-                  <h3 className="text-xl font-bold text-slate-800 mb-3 group-hover:text-emerald-600 transition-colors leading-tight">
-                    {evento.titulo}
-                  </h3>
-                  <p className="text-slate-500 text-sm mb-6 line-clamp-3 leading-relaxed">
-                    {evento.descricao}
-                  </p>
-                  <div className="mt-auto pt-4 border-t border-slate-100 flex items-center justify-between">
-                    <div className="flex items-center text-slate-400 text-sm gap-1.5">
-                      <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-                      <span className="font-medium text-slate-600">{evento.cidade}</span>
-                    </div>
-                    <button 
-                      onClick={() => setEventoSelecionado(evento)} 
-                      className="text-emerald-600 font-bold hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 px-4 py-2 rounded-full transition-colors text-sm"
-                    >
-                      Detalhes
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+          {isLoading ? (
+            <LoadingState text="Carregando projetos..." />
+          ) : eventos.length === 0 ? (
+            <EmptyState
+              icon={SearchX}
+              title="Nenhum projeto encontrado"
+              description="Tente buscar por outro termo ou explorar todas as causas disponíveis."
+            />
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {eventos.slice(0, 6).map((evento) => (
+                <EventCard
+                  key={evento.id}
+                  evento={evento}
+                  onDetails={setEventoSelecionado}
+                  tone="emerald"
+                />
+              ))}
+            </div>
+          )}
 
+          {!isLoading && eventos.length > 0 && (
           <div className="mt-12 text-center">
             <button onClick={() => navigate("/projetos")} className="inline-flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 px-8 rounded-full shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all">
               Ver todos os projetos
-              <svg viewBox="0 0 24 24" className="w-5 h-5 fill-current" aria-hidden="true"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+              <ArrowRight aria-hidden="true" className="w-5 h-5" />
             </button>
           </div>
+          )}
         </div>
       </section>
 
@@ -228,7 +249,7 @@ export default function Home({
       {/* ========================================= */}
       {eventoSelecionado && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]" role="dialog" aria-modal="true" aria-labelledby="evento-detalhes-titulo">
             
             {/* Cabeçalho do Modal */}
             <div className="flex justify-between items-center p-6 border-b border-slate-100 bg-slate-50">
@@ -238,14 +259,15 @@ export default function Home({
               <button 
                 onClick={() => setEventoSelecionado(null)}
                 className="text-slate-400 hover:text-slate-600 bg-white hover:bg-slate-200 p-2 rounded-full transition-colors"
+                aria-label="Fechar detalhes do projeto"
               >
-                <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+                <X aria-hidden="true" className="w-5 h-5" />
               </button>
             </div>
 
             {/* Corpo do Modal */}
             <div className="p-6 overflow-y-auto">
-              <h3 className="text-2xl font-extrabold text-slate-900 mb-4">{eventoSelecionado.titulo}</h3>
+              <h3 id="evento-detalhes-titulo" className="text-2xl font-extrabold text-slate-900 mb-4">{eventoSelecionado.titulo}</h3>
               <p className="text-slate-600 mb-6 leading-relaxed">
                 {eventoSelecionado.descricao}
               </p>
@@ -254,7 +276,7 @@ export default function Home({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 bg-slate-50 p-6 rounded-2xl border border-slate-100">
                 
                 <div className="flex items-start gap-4">
-                  <span className="text-2xl drop-shadow-sm" aria-hidden="true">📍</span>
+                  <MapPin aria-hidden="true" className="w-6 h-6 text-slate-500 drop-shadow-sm" />
                   <div>
                     <span className="block text-xs font-bold text-slate-400 mb-1 tracking-wider uppercase">Localização</span>
                     <span className="font-semibold text-slate-700">{eventoSelecionado.endereco || eventoSelecionado.cidade || "Local a definir"}</span>
@@ -262,7 +284,7 @@ export default function Home({
                 </div>
 
                 <div className="flex items-start gap-4">
-                  <span className="text-2xl drop-shadow-sm" aria-hidden="true">📅</span>
+                  <Calendar aria-hidden="true" className="w-6 h-6 text-slate-500 drop-shadow-sm" />
                   <div>
                     <span className="block text-xs font-bold text-slate-400 mb-1 tracking-wider uppercase">Data e Hora</span>
                     <span className="font-semibold text-slate-700">
@@ -272,7 +294,7 @@ export default function Home({
                 </div>
 
                 <div className="flex items-start gap-4">
-                  <span className="text-2xl drop-shadow-sm" aria-hidden="true">👥</span>
+                  <Users aria-hidden="true" className="w-6 h-6 text-slate-500 drop-shadow-sm" />
                   <div>
                     <span className="block text-xs font-bold text-slate-400 mb-1 tracking-wider uppercase">Vagas</span>
                     <span className="font-semibold text-slate-700">{eventoSelecionado.vagas || "Ilimitado"}</span>
@@ -280,7 +302,7 @@ export default function Home({
                 </div>
 
                 <div className="flex items-start gap-4">
-                  <span className="text-2xl drop-shadow-sm" aria-hidden="true">🔗</span>
+                  <LinkIcon aria-hidden="true" className="w-6 h-6 text-slate-500 drop-shadow-sm" />
                   <div>
                     <span className="block text-xs font-bold text-slate-400 mb-1 tracking-wider uppercase">Comprovação</span>
                     {eventoSelecionado.link_comprovacao ? (
@@ -348,9 +370,9 @@ export default function Home({
             <a href="#mapa" className="w-full sm:w-auto bg-white text-emerald-950 hover:bg-slate-100 font-bold py-3 px-8 rounded-full shadow-md transition-colors">
               Encontrar projetos
             </a>
-            <a href="/cadastrar-evento" className="w-full sm:w-auto bg-emerald-500 hover:bg-emerald-400 text-emerald-950 font-bold py-3 px-8 rounded-full shadow-md transition-colors">
+            <Link to="/criar-evento" className="w-full sm:w-auto bg-emerald-500 hover:bg-emerald-400 text-emerald-950 font-bold py-3 px-8 rounded-full shadow-md transition-colors">
               Criar novo projeto
-            </a>
+            </Link>
           </div>
 
         </div>

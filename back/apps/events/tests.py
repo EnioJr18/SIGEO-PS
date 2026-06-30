@@ -56,17 +56,16 @@ class InscricaoAPITests(APITestCase):
         self.assertEqual(len(response.data), 1) # A lista não deve vir vazia
 
     def test_participante_pode_cancelar_inscricao(self):
-        """Testa se a rota PATCH muda o status para cancelada"""
+        """Testa se a rota DELETE cancela a inscrição pelo ID do evento"""
         inscricao = Inscricao.objects.create(participante=self.participante, evento=self.evento)
         
         self.client.force_authenticate(user=self.participante)
-        url = reverse('cancelar-inscricao', kwargs={'pk': inscricao.id})
+        url = reverse('cancelar-inscricao', kwargs={'evento_id': self.evento.id})
         
-        response = self.client.patch(url)
-        inscricao.refresh_from_db() # Puxa o dado atualizado do banco
+        response = self.client.delete(url)
         
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(inscricao.status, 'cancelada')
+        self.assertFalse(Inscricao.objects.filter(id=inscricao.id).exists())
 
     def test_organizador_ve_inscricoes_no_seu_evento(self):
         """Testa o isolamento de dados do Dashboard do Organizador"""

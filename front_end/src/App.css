@@ -1939,17 +1939,22 @@
   z-index: 400; /* Leaflet usa z-index altos */
   width: 90%;
   max-width: 400px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: white;
+  border-radius: 30px;
+  padding: 0 16px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.15);
 }
 
 .map-search-bar input {
   width: 100%;
-  padding: 12px 20px;
-  border-radius: 30px;
+  padding: 12px 0;
   border: none;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.15);
   font-size: 1rem;
   outline: none;
-  background: white;
+  background: transparent;
 }
 
 /* BOTÃO DE GPS FLUTUANTE (AGORA SEGUINDO A ABA) */

@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { AlertTriangle, CheckCircle } from 'lucide-react';
 
 export default function Cadastro({ onSubmit, registerError, registerSuccess }) {
   const navigate = useNavigate();
@@ -108,12 +109,14 @@ export default function Cadastro({ onSubmit, registerError, registerSuccess }) {
           {/* Avisos de Erro / Sucesso */}
           {(localError || registerError) && (
             <div className="p-4 bg-red-50 border border-red-200 text-red-600 rounded-xl text-sm font-medium flex items-start gap-2">
-              <span>⚠️</span> {localError || registerError}
+              <AlertTriangle aria-hidden="true" className="w-5 h-5 shrink-0" />
+              {localError || registerError}
             </div>
           )}
           {registerSuccess && (
             <div className="p-4 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl text-sm font-medium flex items-start gap-2">
-              <span>✅</span> {registerSuccess}
+              <CheckCircle aria-hidden="true" className="w-5 h-5 shrink-0" />
+              {registerSuccess}
             </div>
           )}
 

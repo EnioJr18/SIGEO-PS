@@ -1,5 +1,4 @@
 from django.urls import path
-from .views import EventoSocialListCreateView, EventoSocialDetailView, InscreverEventoView
 from apps.events import views
 
 urlpatterns = [

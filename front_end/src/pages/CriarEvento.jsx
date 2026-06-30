@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import AddressAutocomplete from '../AddressAutocomplete.jsx';
 import { useNavigate, useParams } from 'react-router-dom';
 import { createEvento, updateEvento, getEvento } from '../api';
+import LoadingState from '../components/ui/LoadingState.jsx';
 
 export default function CriarEvento() {
   const navigate = useNavigate();
@@ -112,7 +113,7 @@ export default function CriarEvento() {
   if (loading) {
     return (
       <div className="py-16 bg-slate-50 min-h-screen flex items-center justify-center">
-        <p className="text-xl font-bold text-slate-500">Carregando dados do projeto...</p>
+        <LoadingState text="Carregando dados do projeto..." />
       </div>
     );
   }

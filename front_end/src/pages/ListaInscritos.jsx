@@ -1,6 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { Users } from 'lucide-react';
 import { getInscricoesRecebidas } from '../api';
+import EmptyState from '../components/ui/EmptyState.jsx';
+import LoadingState from '../components/ui/LoadingState.jsx';
 
 const ListaInscritos = () => {
   const { id } = useParams(); // Pega o ID do evento na URL
@@ -34,11 +37,14 @@ const ListaInscritos = () => {
       </div>
 
       {loading ? (
-        <p className="text-slate-500">Carregando lista...</p>
+        <LoadingState text="Carregando inscritos..." />
       ) : inscritos.length === 0 ? (
-        <div className="p-8 text-center bg-slate-50 rounded-2xl border border-dashed border-slate-300">
-          <p className="text-slate-500 font-medium">Ainda não há voluntários inscritos neste projeto.</p>
-        </div>
+        <EmptyState
+          icon={Users}
+          title="Nenhum participante inscrito"
+          description="Ainda não há voluntários inscritos neste projeto."
+          className="bg-slate-50 border-dashed shadow-none"
+        />
       ) : (
         <div className="overflow-x-auto">
          <table className="w-full text-left border-collapse">

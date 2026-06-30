@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from 'react-leaflet';
+import { LocateFixed, Search, SearchX, X } from 'lucide-react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -114,7 +115,7 @@ function EventMap({ eventos, isLoading, apiError, onViewDetails, onParticipar, i
           setUserLocation(coords);
           setMapCenter(coords);
         },
-        (err) => alert('Acesso ao GPS negado. Toque no mapa para marcar.')
+        () => alert('Acesso ao GPS negado. Toque no mapa para marcar.')
       );
     } else {
       alert('Navegador não suporta GPS.');
@@ -131,11 +132,13 @@ function EventMap({ eventos, isLoading, apiError, onViewDetails, onParticipar, i
   return (
     <div className="ifood-map-container">
       <div className="map-search-bar">
+        <Search aria-hidden="true" className="w-4 h-4 text-slate-400" />
         <input 
           type="text" 
-          placeholder="🔍 Buscar projeto social ativo..." 
+          placeholder="Buscar projeto social ativo..." 
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
+          aria-label="Buscar projeto no mapa"
         />
       </div>
 
@@ -187,7 +190,7 @@ function EventMap({ eventos, isLoading, apiError, onViewDetails, onParticipar, i
 
         {/* MOVA O BOTÃO PARA CÁ (DENTRO DA BOTTOM SHEET) */}
         <button className="gps-fab" onClick={requestLocation} title="Minha localização">
-          📍
+          <LocateFixed aria-hidden="true" className="w-5 h-5" />
         </button>
 
         <div className="sheet-drag-handle" onClick={() => setBottomSheetOpen(!bottomSheetOpen)}>
@@ -205,7 +208,7 @@ function EventMap({ eventos, isLoading, apiError, onViewDetails, onParticipar, i
               const isSelected = selectedEventId === evento.id;
               
               // NOVO: Verifica se o usuário já se inscreveu neste evento
-              const isConfirmed = inscricoesConfirmadas.includes(evento.id);
+              const isConfirmed = inscricoesConfirmadas.some(inscricao => inscricao.evento === evento.id);
 
               return (
                 <div 
@@ -223,8 +226,9 @@ function EventMap({ eventos, isLoading, apiError, onViewDetails, onParticipar, i
                         onClick={(e) => { e.stopPropagation(); setSelectedEventId(null); }}
                         style={{ position: 'absolute', top: '-5px', right: '0px', background: 'transparent', border: 'none', fontSize: '1.2rem', color: '#94a3b8', cursor: 'pointer' }}
                         title="Desmarcar"
+                        aria-label="Desmarcar projeto"
                       >
-                        ✕
+                        <X aria-hidden="true" className="w-4 h-4" />
                       </button>
                     )}
                   </div>
@@ -251,14 +255,19 @@ function EventMap({ eventos, isLoading, apiError, onViewDetails, onParticipar, i
                         }}
                         style={isConfirmed ? { backgroundColor: '#fee2e2', color: '#dc2626' } : {}}
                       >
-                        {isConfirmed ? 'Cancelar ❌' : 'Quero Ajudar'}
+                        {isConfirmed ? 'Cancelar inscrição' : 'Quero Ajudar'}
                       </button>
                     </div>
                   )}
                 </div>
               );
             })}
-            {filteredEvents.length === 0 && !isLoading && <p className="sheet-msg">Nenhum projeto ativo encontrado.</p>}
+            {filteredEvents.length === 0 && !isLoading && (
+              <p className="sheet-msg flex items-center justify-center gap-2">
+                <SearchX aria-hidden="true" className="w-4 h-4" />
+                Nenhum projeto ativo encontrado.
+              </p>
+            )}
           </div>
         </div>
       </div>

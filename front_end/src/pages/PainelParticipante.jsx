@@ -1,6 +1,26 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { getPerfil, updatePerfil, deletePerfil, getMinhasInscricoes } from '../api';
+import { AlertTriangle, Calendar, CalendarDays, CalendarX, CheckCircle, Clock3, History, Settings, Sprout } from 'lucide-react';
+import { cancelarInscricao, getPerfil, updatePerfil, deletePerfil, getMinhasInscricoes } from '../api';
+import EmptyState from '../components/ui/EmptyState.jsx';
+import LoadingState from '../components/ui/LoadingState.jsx';
+
+const statusStyles = {
+  confirmada: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+  pendente: 'bg-amber-50 text-amber-700 border-amber-200',
+  cancelada: 'bg-red-50 text-red-700 border-red-200',
+};
+
+function StatusBadge({ status }) {
+  const label = status || 'confirmada';
+
+  return (
+    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full border text-xs font-bold capitalize ${statusStyles[label] || statusStyles.confirmada}`}>
+      <span className="w-1.5 h-1.5 rounded-full bg-current" aria-hidden="true" />
+      {label}
+    </span>
+  );
+}
 
 export default function PainelParticipante() {
   const navigate = useNavigate();
@@ -12,10 +32,6 @@ export default function PainelParticipante() {
   const [perfil, setPerfil] = useState({ first_name: '', email: '' });
   const [agenda, setAgenda] = useState([]);
   const [historico, setHistorico] = useState([]);
-
-  useEffect(() => {
-    carregarDados();
-  }, []);
 
   const carregarDados = async () => {
     try {
@@ -69,7 +85,7 @@ export default function PainelParticipante() {
     try {
       await updatePerfil(perfil);
       setMensagem({ tipo: 'sucesso', texto: 'Perfil atualizado com sucesso!' });
-    } catch (error) {
+    } catch {
       setMensagem({ tipo: 'erro', texto: 'Erro ao atualizar o perfil.' });
     }
   };
@@ -85,16 +101,34 @@ export default function PainelParticipante() {
         localStorage.removeItem('token'); 
         alert("Conta excluída. Esperamos ver você de novo no futuro!");
         navigate('/'); // Joga o usuário de volta para a Home
-      } catch (error) {
+      } catch {
         setMensagem({ tipo: 'erro', texto: 'Erro ao tentar excluir a conta.' });
       }
+    }
+  };
+
+  useEffect(() => {
+    const timer = setTimeout(carregarDados, 0);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const handleCancelarInscricao = async (inscricao) => {
+    const confirmacao = window.confirm("Tem certeza que deseja cancelar esta inscrição?");
+    if (!confirmacao) return;
+
+    try {
+      await cancelarInscricao(inscricao.evento);
+      setMensagem({ tipo: 'sucesso', texto: 'Inscrição cancelada com sucesso.' });
+      await carregarDados();
+    } catch (error) {
+      setMensagem({ tipo: 'erro', texto: error.message || 'Erro ao cancelar inscrição.' });
     }
   };
 
   if (loading) {
     return (
       <div className="py-16 bg-slate-50 min-h-screen flex items-center justify-center">
-        <p className="text-xl font-bold text-slate-500">Carregando seu painel...</p>
+        <LoadingState text="Carregando seu painel..." />
       </div>
     );
   }
@@ -109,32 +143,61 @@ export default function PainelParticipante() {
           <p className="text-slate-600 text-lg">Acompanhe sua agenda, seu histórico de impacto e gerencie sua conta.</p>
         </div>
 
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+          <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Próximos eventos</span>
+              <CalendarDays aria-hidden="true" className="w-5 h-5 text-emerald-600" />
+            </div>
+            <strong className="text-3xl font-extrabold text-slate-900">{agenda.length}</strong>
+          </div>
+          <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Histórico</span>
+              <History aria-hidden="true" className="w-5 h-5 text-blue-600" />
+            </div>
+            <strong className="text-3xl font-extrabold text-slate-900">{historico.length}</strong>
+          </div>
+          <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Conta</span>
+              <Settings aria-hidden="true" className="w-5 h-5 text-slate-600" />
+            </div>
+            <span className="text-sm font-semibold text-slate-600">Perfil e preferências</span>
+          </div>
+        </div>
+
         {/* Sistema de Abas (Tabs) */}
         <div className="flex flex-wrap gap-2 mb-8 border-b border-slate-200 pb-4">
           <button 
             onClick={() => setActiveTab('agenda')}
             className={`px-6 py-2.5 rounded-full font-bold transition-all ${activeTab === 'agenda' ? 'bg-emerald-600 text-white shadow-md' : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'}`}
           >
-            📅 Minha Agenda
+            <CalendarDays aria-hidden="true" className="w-4 h-4 inline-block mr-2" />
+            Minha Agenda
           </button>
           <button 
             onClick={() => setActiveTab('historico')}
             className={`px-6 py-2.5 rounded-full font-bold transition-all ${activeTab === 'historico' ? 'bg-emerald-600 text-white shadow-md' : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'}`}
           >
-            ⭐ Histórico de Impacto
+            <History aria-hidden="true" className="w-4 h-4 inline-block mr-2" />
+            Histórico de Impacto
           </button>
           <button 
             onClick={() => setActiveTab('perfil')}
             className={`px-6 py-2.5 rounded-full font-bold transition-all ${activeTab === 'perfil' ? 'bg-slate-800 text-white shadow-md' : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'}`}
           >
-            ⚙️ Configurações
+            <Settings aria-hidden="true" className="w-4 h-4 inline-block mr-2" />
+            Configurações
           </button>
         </div>
 
         {/* Feedback de Mensagens */}
         {mensagem.texto && (
           <div className={`mb-6 p-4 rounded-xl flex items-start gap-3 border ${mensagem.tipo === 'erro' ? 'bg-red-50 border-red-200 text-red-600' : 'bg-emerald-50 border-emerald-200 text-emerald-700'}`}>
-            <span aria-hidden="true" className="text-lg">{mensagem.tipo === 'erro' ? '⚠️' : '✅'}</span>
+            {mensagem.tipo === 'erro'
+              ? <AlertTriangle aria-hidden="true" className="w-5 h-5 shrink-0" />
+              : <CheckCircle aria-hidden="true" className="w-5 h-5 shrink-0" />}
             <p className="text-sm font-medium">{mensagem.texto}</p>
           </div>
         )}
@@ -145,26 +208,41 @@ export default function PainelParticipante() {
         {activeTab === 'agenda' && (
           <div className="space-y-4">
             {agenda.length === 0 ? (
-              <div className="bg-white p-10 rounded-3xl border border-slate-200 text-center shadow-sm">
-                <span className="text-4xl block mb-4">🗓️</span>
-                <h3 className="text-xl font-bold text-slate-800 mb-2">Sua agenda está livre!</h3>
-                <p className="text-slate-500 mb-6">Você ainda não está inscrito em nenhum evento futuro.</p>
-                <Link to="/projetos" className="inline-block px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-full transition-colors">
-                  Explorar Projetos
-                </Link>
-              </div>
+              <EmptyState
+                icon={CalendarX}
+                title="Sua agenda está livre"
+                description="Você ainda não está inscrito em nenhum evento futuro."
+                action={(
+                  <Link to="/projetos" className="inline-block px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-full transition-colors">
+                    Explorar Projetos
+                  </Link>
+                )}
+              />
             ) : (
               agenda.map((insc) => (
-                <div key={insc.id} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <div>
-                    <span className="inline-block px-3 py-1 bg-emerald-50 text-emerald-700 text-xs font-bold rounded-lg mb-2">Acontecerá em breve</span>
+                <div key={insc.id} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:shadow-md transition-shadow">
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2 mb-2">
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 text-emerald-700 text-xs font-bold rounded-lg">
+                        <Clock3 aria-hidden="true" className="w-3.5 h-3.5" />
+                        Acontecerá em breve
+                      </span>
+                      <StatusBadge status={insc.status} />
+                    </div>
                     <h3 className="text-xl font-bold text-slate-800">{insc.evento_titulo}</h3>
-                    <p className="text-slate-500 mt-1">🗓️ {new Date(insc.evento_data).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })}</p>
+                    <p className="text-slate-500 mt-1 flex items-center gap-2">
+                      <Calendar aria-hidden="true" className="w-4 h-4" />
+                      {new Date(insc.evento_data).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })}
+                    </p>
                   </div>
-                  {/* Botão de cancelar (podemos implementar a rota da API depois) */}
-                  <button className="px-5 py-2.5 text-sm font-bold text-red-600 hover:bg-red-50 rounded-xl border border-red-200 transition-colors">
-                    Cancelar Inscrição
-                  </button>
+                  {insc.status !== 'cancelada' && (
+                    <button
+                      onClick={() => handleCancelarInscricao(insc)}
+                      className="px-5 py-2.5 text-sm font-bold text-red-600 hover:bg-red-50 rounded-xl border border-red-200 transition-colors"
+                    >
+                      Cancelar inscrição
+                    </button>
+                  )}
                 </div>
               ))
             )}
@@ -177,15 +255,18 @@ export default function PainelParticipante() {
         {activeTab === 'historico' && (
           <div className="space-y-4">
             {historico.length === 0 ? (
-              <div className="bg-white p-10 rounded-3xl border border-slate-200 text-center shadow-sm">
-                <span className="text-4xl block mb-4">🌱</span>
-                <h3 className="text-xl font-bold text-slate-800 mb-2">Seu impacto começa aqui</h3>
-                <p className="text-slate-500">Quando você participar de eventos, eles ficarão salvos no seu portfólio.</p>
-              </div>
+              <EmptyState
+                icon={Sprout}
+                title="Seu impacto começa aqui"
+                description="Quando você participar de eventos, eles ficarão salvos no seu portfólio."
+              />
             ) : (
               historico.map((insc) => (
-                <div key={insc.id} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4 opacity-80 hover:opacity-100 transition-opacity">
-                  <div>
+                <div key={insc.id} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4 opacity-90 hover:opacity-100 transition-opacity">
+                  <div className="min-w-0">
+                    <div className="mb-2">
+                      <StatusBadge status={insc.status} />
+                    </div>
                     <h3 className="text-lg font-bold text-slate-800">{insc.evento_titulo}</h3>
                     <p className="text-slate-500 mt-1">Realizado em: {new Date(insc.evento_data).toLocaleDateString('pt-BR')}</p>
                   </div>

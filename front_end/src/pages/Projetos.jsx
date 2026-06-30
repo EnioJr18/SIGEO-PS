@@ -1,83 +1,112 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { Calendar, Filter, Link as LinkIcon, MapPin, Search, SearchX, Users, X } from 'lucide-react';
+import EventCard from '../components/events/EventCard.jsx';
+import EmptyState from '../components/ui/EmptyState.jsx';
+import LoadingState from '../components/ui/LoadingState.jsx';
 
-export default function Projetos({ eventos, handleParticipar, inscricoesConfirmadas = [] }) {
+const categoryOptions = [
+  { value: '', label: 'Todas as causas' },
+  { value: 'educacao', label: 'Educação' },
+  { value: 'saude', label: 'Saúde' },
+  { value: 'tecnologia', label: 'Tecnologia' },
+  { value: 'meio_ambiente', label: 'Meio Ambiente' },
+  { value: 'assistencia_social', label: 'Assistência Social' },
+  { value: 'cultura', label: 'Cultura' },
+  { value: 'outro', label: 'Outros' },
+];
+
+export default function Projetos({ eventos, handleParticipar, inscricoesConfirmadas = [], isLoading = false }) {
   // Estado local para controlar o Modal nesta página
   const [eventoSelecionado, setEventoSelecionado] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const filteredEventos = eventos.filter((evento) => {
+    const search = searchTerm.trim().toLowerCase();
+    const matchesSearch = !search || [evento.titulo, evento.descricao, evento.cidade, evento.endereco]
+      .filter(Boolean)
+      .some((value) => String(value).toLowerCase().includes(search));
+    const matchesCategory = !selectedCategory || evento.categoria === selectedCategory;
+
+    return matchesSearch && matchesCategory;
+  });
 
   return (
     <div className="py-16 bg-slate-50 min-h-screen">
       <div className="container mx-auto px-4 max-w-6xl">
         
         {/* Cabeçalho da Página */}
-        <div className="mb-12 text-center">
+        <div className="mb-10 text-center">
           <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 mb-4 tracking-tight">
             Todos os Projetos
           </h1>
           <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-            Explore todas as oportunidades de voluntariado e impacto social. Use a barra de pesquisa na página inicial para filtrar resultados específicos.
+            Explore oportunidades de voluntariado e use a busca para encontrar iniciativas por nome, causa ou local.
           </p>
         </div>
 
+        <div className="bg-white border border-slate-200 rounded-3xl shadow-sm p-4 md:p-5 mb-8 grid grid-cols-1 md:grid-cols-[1fr_auto] gap-3">
+          <label className="relative flex items-center">
+            <Search aria-hidden="true" className="absolute left-4 w-5 h-5 text-slate-400" />
+            <input
+              type="search"
+              value={searchTerm}
+              onChange={(event) => setSearchTerm(event.target.value)}
+              placeholder="Buscar por nome, descrição ou local..."
+              className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 pl-12 pr-4 text-slate-700 outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
+            />
+          </label>
+
+          <label className="relative flex items-center md:min-w-64">
+            <Filter aria-hidden="true" className="absolute left-4 w-5 h-5 text-slate-400" />
+            <select
+              value={selectedCategory}
+              onChange={(event) => setSelectedCategory(event.target.value)}
+              className="w-full appearance-none rounded-2xl border border-slate-200 bg-slate-50 py-3 pl-12 pr-4 text-slate-700 outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
+              aria-label="Filtrar projetos por categoria"
+            >
+              {categoryOptions.map((option) => (
+                <option key={option.value || 'all'} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+
         {/* Verificação se a lista está vazia */}
-        {eventos.length === 0 ? (
-          <div className="text-center py-20 bg-white rounded-3xl border border-slate-100 shadow-sm">
-            <span className="text-6xl mb-4 block">🔍</span>
-            <h3 className="text-2xl font-bold text-slate-700 mb-2">Nenhum projeto encontrado</h3>
-            <p className="text-slate-500 mb-6">Não encontramos nenhuma iniciativa com esses filtros.</p>
-            <a href="/" className="text-blue-600 font-bold hover:text-blue-800 hover:underline">
-              &larr; Voltar para a tela inicial
-            </a>
-          </div>
+        {isLoading ? (
+          <LoadingState text="Carregando projetos..." />
+        ) : filteredEventos.length === 0 ? (
+          <EmptyState
+            icon={SearchX}
+            title="Nenhum projeto encontrado"
+            description="Não encontramos nenhuma iniciativa para os filtros selecionados."
+            action={(
+              <Link to="/" className="text-blue-600 font-bold hover:text-blue-800 hover:underline">
+                &larr; Voltar para a tela inicial
+              </Link>
+            )}
+          />
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {eventos.map((evento) => (
-              <div key={evento.id} id={`evento-card-${evento.id}`} className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl border border-slate-100 transition-all duration-300 group flex flex-col h-full hover:-translate-y-1">
-                
-                {/* Topo Colorido do Card */}
-                <div className={`relative h-40 flex items-start justify-end p-4 ${
-                  evento.id % 3 === 0 ? 'bg-gradient-to-br from-emerald-400 to-teal-600' : 
-                  evento.id % 2 === 0 ? 'bg-gradient-to-br from-blue-400 to-indigo-600' : 
-                  'bg-gradient-to-br from-orange-400 to-rose-500'
-                }`}>
-                  <span className="bg-white/90 backdrop-blur-sm text-slate-800 text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wider shadow-sm">
-                    {evento.categoria}
-                  </span>
-                </div>
-
-                {/* Conteúdo do Card */}
-                <div className="p-6 flex flex-col flex-grow">
-                  <h3 className="text-xl font-bold text-slate-800 mb-3 group-hover:text-blue-600 transition-colors leading-tight">
-                    {evento.titulo}
-                  </h3>
-                  <p className="text-slate-500 text-sm mb-6 line-clamp-3 leading-relaxed">
-                    {evento.descricao}
-                  </p>
-                  
-                  {/* Rodapé do Card */}
-                  <div className="mt-auto pt-4 border-t border-slate-100 flex items-center justify-between">
-                    <div className="flex items-center text-slate-400 text-sm gap-1.5">
-                      <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-                      <span className="font-medium text-slate-600">{evento.cidade}</span>
-                    </div>
-                    <button 
-                      onClick={() => setEventoSelecionado(evento)} 
-                      className="text-blue-600 font-bold hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-4 py-2 rounded-full transition-colors text-sm"
-                    >
-                      Detalhes
-                    </button>
-                  </div>
-                </div>
-              </div>
+            {filteredEventos.map((evento) => (
+              <EventCard
+                key={evento.id}
+                evento={evento}
+                onDetails={setEventoSelecionado}
+                tone="blue"
+              />
             ))}
           </div>
         )}
 
         {/* Botão extra de voltar no final da lista */}
-        {eventos.length > 0 && (
+        {!isLoading && filteredEventos.length > 0 && (
           <div className="mt-16 text-center">
-             <a href="/" className="text-slate-500 hover:text-slate-800 font-medium hover:underline transition-all">
+             <Link to="/" className="text-slate-500 hover:text-slate-800 font-medium hover:underline transition-all">
               &larr; Voltar para a tela inicial
-            </a>
+            </Link>
           </div>
         )}
       </div>
@@ -87,7 +116,7 @@ export default function Projetos({ eventos, handleParticipar, inscricoesConfirma
       {/* ========================================= */}
       {eventoSelecionado && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]" role="dialog" aria-modal="true" aria-labelledby="projeto-detalhes-titulo">
             
             <div className="flex justify-between items-center p-6 border-b border-slate-100 bg-slate-50">
               <span className="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
@@ -96,13 +125,14 @@ export default function Projetos({ eventos, handleParticipar, inscricoesConfirma
               <button 
                 onClick={() => setEventoSelecionado(null)}
                 className="text-slate-400 hover:text-slate-600 bg-white hover:bg-slate-200 p-2 rounded-full transition-colors"
+                aria-label="Fechar detalhes do projeto"
               >
-                <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+                <X aria-hidden="true" className="w-5 h-5" />
               </button>
             </div>
 
             <div className="p-6 overflow-y-auto">
-              <h3 className="text-2xl font-extrabold text-slate-900 mb-4">{eventoSelecionado.titulo}</h3>
+              <h3 id="projeto-detalhes-titulo" className="text-2xl font-extrabold text-slate-900 mb-4">{eventoSelecionado.titulo}</h3>
               <p className="text-slate-600 mb-6 leading-relaxed">
                 {eventoSelecionado.descricao}
               </p>
@@ -110,34 +140,30 @@ export default function Projetos({ eventos, handleParticipar, inscricoesConfirma
               <div className="bg-slate-50 rounded-2xl p-5 border border-slate-100">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   <div className="flex items-start gap-3">
-                    <span className="text-2xl" aria-hidden="true">📍</span>
+                    <MapPin aria-hidden="true" className="w-6 h-6 text-slate-500" />
                     <div>
                       <p className="text-[0.65rem] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Localização</p>
-                      <p className="font-semibold text-slate-700 text-sm">{eventoSelecionado.cidade}</p>
+                      <p className="font-semibold text-slate-700 text-sm">{eventoSelecionado.endereco || eventoSelecionado.cidade || "Local a definir"}</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
-                    <span className="text-2xl" aria-hidden="true">📅</span>
+                    <Calendar aria-hidden="true" className="w-6 h-6 text-slate-500" />
                     <div>
                       <p className="text-[0.65rem] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Data e Hora</p>
-                      <p className="font-semibold text-slate-700 text-sm">15 de Julho • 08:00 - 12:00</p>
+                      <p className="font-semibold text-slate-700 text-sm">
+                        {eventoSelecionado.data_hora ? new Date(eventoSelecionado.data_hora).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }) : "Data não informada"}
+                      </p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
-                    <span className="text-2xl" aria-hidden="true">⭐</span>
+                    <Users aria-hidden="true" className="w-6 h-6 text-slate-500" />
                     <div>
-                      <p className="text-[0.65rem] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Avaliação Média</p>
-                      <div className="flex items-center gap-1">
-                        <span className="font-bold text-slate-700 text-sm">4.8</span>
-                        <div className="flex text-amber-400 text-sm tracking-tighter">
-                          ★★★★<span className="text-slate-300">★</span>
-                        </div>
-                        <span className="text-xs text-slate-400 ml-1">(12)</span>
-                      </div>
+                      <p className="text-[0.65rem] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Vagas</p>
+                      <p className="font-semibold text-slate-700 text-sm">{eventoSelecionado.vagas || "Ilimitado"}</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
-                    <span className="text-2xl" aria-hidden="true">🔗</span>
+                    <LinkIcon aria-hidden="true" className="w-6 h-6 text-slate-500" />
                     <div>
                       <p className="text-[0.65rem] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Comprovação</p>
                       <a href={eventoSelecionado.link_comprovacao || "#"} target="_blank" rel="noreferrer" className="font-semibold text-sm text-blue-600 hover:text-blue-800 hover:underline transition-colors line-clamp-1">
@@ -161,9 +187,15 @@ export default function Projetos({ eventos, handleParticipar, inscricoesConfirma
                   if (handleParticipar) handleParticipar(eventoSelecionado.id);
                   setEventoSelecionado(null);
                 }}
-                className="px-6 py-3 rounded-full font-bold text-white bg-blue-600 hover:bg-blue-500 shadow-md transition-all hover:-translate-y-0.5"
+                className={`px-6 py-3 rounded-full font-bold text-white shadow-md transition-all hover:-translate-y-0.5 ${
+                  inscricoesConfirmadas.some(insc => insc.evento === eventoSelecionado.id)
+                    ? 'bg-red-500 hover:bg-red-600'
+                    : 'bg-blue-600 hover:bg-blue-500'
+                }`}
               >
-                Confirmar Inscrição
+                {inscricoesConfirmadas.some(insc => insc.evento === eventoSelecionado.id)
+                  ? "Cancelar Inscrição"
+                  : "Confirmar Inscrição"}
               </button>
             </div>
 

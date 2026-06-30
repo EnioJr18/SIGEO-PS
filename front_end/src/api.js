@@ -1,4 +1,3 @@
-// const API_BASE = 'https://sigeops.onrender.com/api';
 export const API_BASE = 'http://localhost:8000/api';
 
 function getAuthToken() {
@@ -164,7 +163,7 @@ export async function loginUser(payload) {
 }
 
 export async function getProfile() {
-  return request('/users/me/');
+  return request('/users/perfil/');
 }
 
 export async function getInscricoesRecebidas() {
@@ -173,71 +172,44 @@ export async function getInscricoesRecebidas() {
 
 // Adicione isso junto com as outras funções do api.js
 export const cancelarInscricao = async (eventoId) => {
-  const token = localStorage.getItem('accessToken') || localStorage.getItem('token')
-
-  const response = await fetch(`${API_BASE}/eventos/${eventoId}/cancelar-inscricao/`, {
+  await request(`/eventos/${eventoId}/cancelar-inscricao/`, {
     method: 'DELETE',
-    headers: {
-      'Authorization': `Bearer ${token}`
-    }
-  })
+  });
 
-  if (!response.ok) {
-    throw new Error('Falha ao cancelar inscrição')
-  }
-
-  return true
+  return true;
 }
 
 export async function getMinhasInscricoes() {
   return request('/eventos/minhas-inscricoes/');
 }
 
+export async function sendChatMessage(message) {
+  return request('/ai/chat/', {
+    method: 'POST',
+    body: JSON.stringify({ message }),
+  });
+}
+
 // Função para o Organizador deletar seu próprio evento
 export const deleteEvento = async (eventoId) => {
-  const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
-
-  const response = await fetch(`${API_BASE}/eventos/${eventoId}/`, {
+  await request(`/eventos/${eventoId}/`, {
     method: 'DELETE',
-    headers: {
-      'Authorization': `Bearer ${token}`
-    }
   });
-
-  if (!response.ok && response.status !== 204) {
-    throw new Error('Falha ao excluir o projeto. Verifique suas permissões.');
-  }
 
   return true;
 };
 
 // Função para o Organizador editar um projeto existente
 export const updateEvento = async (eventoId, payload) => {
-  const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
-  
-  const response = await fetch(`${API_BASE}/eventos/${eventoId}/`, {
-    method: 'PATCH', // Usamos PATCH para atualizar apenas os campos enviados
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    },
-    body: JSON.stringify(payload)
+  return request(`/eventos/${eventoId}/`, {
+    method: 'PATCH',
+    body: JSON.stringify(payload),
   });
-
-  if (!response.ok) {
-    throw new Error('Falha ao atualizar o projeto. Verifique os dados.');
-  }
-
-  return response.json();
 };
 
 // Função para buscar um único evento pelo ID (para edição)
 export const getEvento = async (eventoId) => {
-  const response = await fetch(`${API_BASE}/eventos/${eventoId}/`);
-  if (!response.ok) {
-    throw new Error('Falha ao carregar os dados do projeto.');
-  }
-  return response.json();
+  return request(`/eventos/${eventoId}/`);
 };
 
 // ==========================================
@@ -246,30 +218,22 @@ export const getEvento = async (eventoId) => {
 
 // Busca os dados do perfil logado
 export const getPerfil = async () => {
-  const response = await fetch(`${API_BASE}/users/perfil/`, {
-    headers: getAuthHeaders(),
-  });
-  if (!response.ok) throw new Error('Falha ao carregar perfil.');
-  return response.json();
+  return request('/users/perfil/');
 };
 
 // Atualiza o perfil logado
 export const updatePerfil = async (dados) => {
-  const response = await fetch(`${API_BASE}/users/perfil/`, {
+  return request('/users/perfil/', {
     method: 'PATCH',
-    headers: getAuthHeaders(),
     body: JSON.stringify(dados),
   });
-  if (!response.ok) throw new Error('Falha ao atualizar perfil.');
-  return response.json();
 };
 
 // Exclui a conta permanentemente
 export const deletePerfil = async () => {
-  const response = await fetch(`${API_BASE}/users/perfil/`, {
+  await request('/users/perfil/', {
     method: 'DELETE',
-    headers: getAuthHeaders(),
   });
-  if (!response.ok) throw new Error('Falha ao excluir conta.');
-  return true; // DELETE costuma retornar vazio com status 204
+
+  return true;
 };

@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { AlertTriangle, CheckCircle, Home } from 'lucide-react';
 
 export default function Login({ onSubmit, loginError, loginSuccess }) {
   const [identifier, setIdentifier] = useState('');
@@ -25,7 +26,7 @@ export default function Login({ onSubmit, loginError, loginSuccess }) {
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
             <span className="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center">
-              <svg className="w-7 h-7 fill-current" viewBox="0 0 24 24"><path d="M4 19V8.5L12 4l8 4.5V19h-5v-6H9v6H4Zm7-8h2V8h-2v3Z" /></svg>
+              <Home aria-hidden="true" className="w-7 h-7" />
             </span>
           </div>
           <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">Bem-vindo de volta</h2>
@@ -63,12 +64,14 @@ export default function Login({ onSubmit, loginError, loginSuccess }) {
           {/* Feedbacks de Erro e Sucesso */}
           {loginError && (
             <div className="p-4 bg-red-50 border border-red-200 text-red-600 rounded-xl text-sm font-medium flex items-start gap-2">
-              <span>⚠️</span> {loginError}
+              <AlertTriangle aria-hidden="true" className="w-5 h-5 shrink-0" />
+              {loginError}
             </div>
           )}
           {loginSuccess && (
             <div className="p-4 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl text-sm font-medium flex items-start gap-2">
-              <span>✅</span> {loginSuccess}
+              <CheckCircle aria-hidden="true" className="w-5 h-5 shrink-0" />
+              {loginSuccess}
             </div>
           )}
 

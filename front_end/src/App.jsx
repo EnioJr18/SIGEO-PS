@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
+import { Award, Home as HomeIcon, Menu, Sparkles, X } from "lucide-react";
 import { Routes, Route, useNavigate } from "react-router-dom"; 
 
 import "./App.css";
 
 import {
-  createEvento,
   inscreverEvento,
   listEventos,
   loginUser,
@@ -59,9 +59,6 @@ export default function App() {
   // ==========================================
   useEffect(() => {
     if (isAuthenticated) {
-      setUserName(localStorage.getItem("userName") || "Usuário");
-      setUserRole(localStorage.getItem("userRole") || "Participante");
-
       getMinhasInscricoes()
         .then(data => setInscricoesConfirmadas(Array.isArray(data) ? data : []))
         .catch(error => console.error("Erro ao puxar inscrições:", error));
@@ -151,7 +148,7 @@ export default function App() {
   const handleLogout = (event) => {
     if (event) event.preventDefault();
     localStorage.clear();
-    window.location.assign("/"); 
+    navigate("/"); 
   };
 
   const handleLogin = async ({ identifier, password }) => {
@@ -164,16 +161,21 @@ export default function App() {
 
       try {
         const profileInfo = await getProfile();
-        localStorage.setItem("userName", profileInfo.username || profileInfo.first_name || identifier);
+        const profileName = profileInfo.username || profileInfo.first_name || identifier;
         const roleFormatado = profileInfo.role === "organizador" ? "Organizador" : "Participante";
+        localStorage.setItem("userName", profileName);
         localStorage.setItem("userRole", roleFormatado);
-      } catch (profileError) {
+        setUserName(profileName);
+        setUserRole(roleFormatado);
+      } catch {
          localStorage.setItem("userName", identifier);
          localStorage.setItem("userRole", "Participante");
+         setUserName(identifier);
+         setUserRole("Participante");
       }
 
       setLoginSuccess("Entrada realizada com sucesso. Redirecionando...");
-      setTimeout(() => window.location.assign("/"), 800);
+      setTimeout(() => navigate("/"), 800);
     } catch (error) {
       setLoginError(error.message || "Não foi possível entrar. Confira seus dados.");
     }
@@ -205,23 +207,21 @@ export default function App() {
       <header className="sticky top-0 z-50 bg-slate-900 text-white shadow-md transition-all">
         <nav className="container mx-auto px-4 py-3 flex items-center justify-between">
           <button onClick={() => { navigate("/"); setIsMobileMenuOpen(false); }} className="flex items-center gap-2 text-xl font-bold tracking-tight hover:text-blue-400 transition-colors">
-            <span aria-hidden="true" className="w-6 h-6 fill-current text-blue-500">
-              <svg viewBox="0 0 24 24"><path d="M4 19V8.5L12 4l8 4.5V19h-5v-6H9v6H4Zm7-8h2V8h-2v3Z" /></svg>
-            </span>
+            <HomeIcon aria-hidden="true" className="w-6 h-6 text-blue-500" />
             <span>SIGEO-PS</span>
           </button>
 
           <div className="flex items-center gap-2 sm:gap-4">
-            <button onClick={() => navigate("/cadastrar-evento")} className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-full text-sm font-bold shadow-md transition-all flex items-center justify-center whitespace-nowrap">
+            <button onClick={() => navigate("/criar-evento")} className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-full text-sm font-bold shadow-md transition-all flex items-center justify-center whitespace-nowrap">
               <span className="hidden sm:inline">Cadastrar projeto</span>
               <span className="sm:hidden">+ Criar</span>
             </button>
 
             <button className="text-slate-300 hover:text-white p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg" onClick={toggleMenu} aria-label="Abrir Menu">
               {isMobileMenuOpen ? (
-                <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                <X aria-hidden="true" className="w-7 h-7" />
               ) : (
-                <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
+                <Menu aria-hidden="true" className="w-7 h-7" />
               )}
             </button>
           </div>
@@ -238,7 +238,7 @@ export default function App() {
                   </span>
                 </div>
                 <div className="flex items-center gap-1.5 px-3 py-1 bg-amber-400 text-amber-900 rounded-full text-xs font-bold shadow-sm">
-                  <span>🏅</span> Cidadão
+                  <Award aria-hidden="true" className="w-4 h-4" /> Cidadão
                 </div>
               </div>
             )}
@@ -275,7 +275,7 @@ export default function App() {
       <main className="flex-grow">
         <Routes>
           <Route path="/" element={<Home eventos={eventos} isLoading={isLoadingEventos} searchValue={searchValue} setSearchValue={setSearchValue} handleSearch={handleSearch} handleParticipar={handleParticipar} inscricoesConfirmadas={inscricoesConfirmadas} setToastMessage={setToastMessage} eventoSelecionado={eventoSelecionado} setEventoSelecionado={setEventoSelecionado} handleCategoryFilter={handleCategoryFilter} />} />
-          <Route path="/projetos" element={<Projetos eventos={eventos} handleParticipar={handleParticipar} inscricoesConfirmadas={inscricoesConfirmadas} />} />
+          <Route path="/projetos" element={<Projetos eventos={eventos} isLoading={isLoadingEventos} handleParticipar={handleParticipar} inscricoesConfirmadas={inscricoesConfirmadas} />} />
           <Route path="/dashboard" element={<DashboardImpacto />} />
           
           {/* Rotas de Organização e Participação */}
@@ -285,6 +285,7 @@ export default function App() {
           <Route path="/perfil" element={<Perfil />} />
           
           <Route path="/criar-evento" element={<CriarEvento />} />
+          <Route path="/cadastrar-evento" element={<CriarEvento />} />
           <Route path="/editar-evento/:id" element={<CriarEvento />} />
           
           <Route path="/login" element={<Login onSubmit={handleLogin} loginError={loginError} loginSuccess={loginSuccess} />} />
@@ -296,7 +297,7 @@ export default function App() {
         {toastMessage && (
           <div className="fixed bottom-10 left-1/2 transform -translate-x-1/2 z-[200]">
             <div className="bg-slate-900 text-white px-6 py-3.5 rounded-full shadow-2xl flex items-center gap-3 border border-slate-700">
-              <span className="text-emerald-400 text-xl" aria-hidden="true">✨</span>
+              <Sparkles aria-hidden="true" className="w-5 h-5 text-emerald-400" />
               <span className="font-bold text-sm tracking-wide">{toastMessage}</span>
             </div>
           </div>
