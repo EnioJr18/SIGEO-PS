@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { AlertTriangle, CheckCircle } from 'lucide-react';
+import { AlertTriangle, CheckCircle, ShieldCheck, UserRound } from 'lucide-react';
 import { getPerfil, updatePerfil, deletePerfil } from '../api';
 import Button from '../components/ui/Button.jsx';
 import Input from '../components/ui/Input.jsx';
@@ -77,15 +77,19 @@ export default function Perfil() {
 
   return (
     <div className="bg-slate-50 min-h-screen py-12">
-      <div className="container mx-auto px-4 max-w-2xl">
+      <div className="container mx-auto px-4 max-w-3xl">
         
-        <div className="mb-8">
-          <h1 className="text-3xl font-extrabold text-slate-900 mb-2">Configurações da Conta</h1>
-          <p className="text-slate-600 text-lg">Gerencie suas informações pessoais e credenciais de acesso.</p>
+        <div className="mb-8 rounded-3xl bg-gradient-to-r from-slate-900 to-emerald-900 p-6 md:p-8 text-white shadow-lg">
+          <span className="inline-flex items-center gap-2 rounded-full bg-white/10 border border-white/15 px-3 py-1 text-xs font-bold text-emerald-100 mb-4">
+            <UserRound aria-hidden="true" className="w-4 h-4" />
+            Minha conta
+          </span>
+          <h1 className="text-3xl md:text-4xl font-extrabold mb-2">Configurações da Conta</h1>
+          <p className="text-emerald-100 text-lg max-w-2xl">Gerencie suas informações pessoais e credenciais de acesso.</p>
         </div>
 
         {mensagem.texto && (
-          <div className={`mb-6 p-4 rounded-xl flex items-start gap-3 border ${mensagem.tipo === 'erro' ? 'bg-red-50 border-red-200 text-red-600' : 'bg-emerald-50 border-emerald-200 text-emerald-700'}`}>
+          <div className={`mb-6 p-4 rounded-xl flex items-start gap-3 border ${mensagem.tipo === 'erro' ? 'bg-red-50 border-red-200 text-red-600' : 'bg-emerald-50 border-emerald-200 text-emerald-700'}`} role="status" aria-live="polite">
             {mensagem.tipo === 'erro'
               ? <AlertTriangle aria-hidden="true" className="w-5 h-5 shrink-0" />
               : <CheckCircle aria-hidden="true" className="w-5 h-5 shrink-0" />}
@@ -95,8 +99,16 @@ export default function Perfil() {
 
         <div className="space-y-8">
           {/* Cartão de Edição */}
-          <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm">
-            <h2 className="text-xl font-bold text-slate-800 mb-6">Informações Pessoais</h2>
+          <div className="bg-white p-6 md:p-8 rounded-3xl border border-slate-200 shadow-sm">
+            <div className="flex items-start gap-4 mb-6">
+              <div className="w-11 h-11 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0">
+                <ShieldCheck aria-hidden="true" className="w-5 h-5" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-slate-800">Informações Pessoais</h2>
+                <p className="text-sm text-slate-500 mt-1">Esses dados aparecem nas áreas internas do sistema.</p>
+              </div>
+            </div>
             
             <form onSubmit={handleSalvarPerfil}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
@@ -117,7 +129,7 @@ export default function Perfil() {
                   required
                 />
               </div>
-              <div className="flex justify-end pt-4 border-t border-slate-100">
+              <div className="flex flex-col sm:flex-row sm:justify-end gap-3 pt-4 border-t border-slate-100">
                 <Button type="submit" variant="secondary" size="lg" className="bg-slate-800 hover:bg-slate-700 text-white border-slate-800">
                   Salvar Alterações
                 </Button>
@@ -126,7 +138,7 @@ export default function Perfil() {
           </div>
 
           {/* Zona de Perigo (LGPD) */}
-          <div className="bg-red-50 border border-red-200 p-8 rounded-3xl">
+          <div className="bg-red-50 border border-red-200 p-6 md:p-8 rounded-3xl">
             <h3 className="text-xl font-bold text-red-700 mb-2">Zona de Perigo</h3>
             <p className="text-red-600/80 mb-6 max-w-xl text-sm">
               Ao excluir sua conta, todos os seus dados e histórico de acessos serão apagados permanentemente. Isso não pode ser desfeito.
@@ -135,6 +147,7 @@ export default function Perfil() {
               variant="danger"
               size="lg"
               onClick={handleExcluirConta}
+              className="w-full sm:w-auto"
             >
               Excluir minha conta permanentemente
             </Button>

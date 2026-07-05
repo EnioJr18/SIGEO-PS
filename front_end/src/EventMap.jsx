@@ -4,7 +4,6 @@ import { LocateFixed, Search, SearchX, X } from 'lucide-react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
-// Correção de bug clássico do Leaflet com ícones no React
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
@@ -21,7 +20,6 @@ const userIcon = new L.Icon({
   shadowSize: [41, 41]
 });
 
-// Pino padrão (Azul)
 const defaultIcon = new L.Icon({
   iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
@@ -31,11 +29,10 @@ const defaultIcon = new L.Icon({
   shadowSize: [41, 41]
 });
 
-// Pino selecionado (Vermelho e um pouco maior)
 const selectedIcon = new L.Icon({
   iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-  iconSize: [30, 48], // Maior para dar destaque
+  iconSize: [30, 48],
   iconAnchor: [15, 48],
   popupAnchor: [1, -34],
   shadowSize: [41, 41]
@@ -51,18 +48,16 @@ function MapController({ center, zoom }) {
   return null;
 }
 
-// O componente agora marca o local do usuário E desmarca o evento
 function MapInteractions({ setPosition, clearSelection }) {
   useMapEvents({
     click(e) {
-      setPosition(e.latlng); // Marca o pino do usuário
-      clearSelection();      // MÁGICA: Limpa o evento selecionado!
+      setPosition(e.latlng);
+      clearSelection();
     },
   });
   return null;
 }
 
-// NOVO: Adicionamos onParticipar e inscricoesConfirmadas nas props!
 function EventMap({ eventos, isLoading, apiError, onViewDetails, onParticipar, inscricoesConfirmadas = [] }) {
   const [mapCenter, setMapCenter] = useState([-9.648139, -35.708949]);
   const [userLocation, setUserLocation] = useState(null);
@@ -71,7 +66,7 @@ function EventMap({ eventos, isLoading, apiError, onViewDetails, onParticipar, i
   const [bottomSheetOpen, setBottomSheetOpen] = useState(true);
 
   const safeEvents = useMemo(() => {
-    const dataHoje = new Date(); // Para comparar as datas
+    const dataHoje = new Date();
 
     return eventos.map(evento => {
       let lat = null;
@@ -95,7 +90,6 @@ function EventMap({ eventos, isLoading, apiError, onViewDetails, onParticipar, i
     }).filter(e => {
       if (e.position === null) return false;
       
-      // REGRAS DE NEGÓCIO: Só aparece se não estiver cancelado E não for passado
       const dataEvento = new Date(e.data_hora);
       const eventoEncerrado = dataEvento < dataHoje;
       
@@ -122,7 +116,6 @@ function EventMap({ eventos, isLoading, apiError, onViewDetails, onParticipar, i
     }
   };
 
-  // A função de selecionar agora NÃO rola mais a tela, só atualiza o mapa
   const handleSelectEvent = (evento) => {
     setSelectedEventId(evento.id);
     setMapCenter(evento.position);
@@ -151,7 +144,6 @@ function EventMap({ eventos, isLoading, apiError, onViewDetails, onParticipar, i
         <MapController center={mapCenter} zoom={14} />
         <MapInteractions setPosition={setUserLocation} clearSelection={() => setSelectedEventId(null)} />
 
-        {/* Pinos dos Eventos Atualizados */}
         {safeEvents.map(evento => {
           const isSelected = selectedEventId === evento.id;
 
@@ -161,18 +153,19 @@ function EventMap({ eventos, isLoading, apiError, onViewDetails, onParticipar, i
               position={evento.position}
               icon={isSelected ? selectedIcon : defaultIcon}
               eventHandlers={{ click: () => handleSelectEvent(evento) }}
-              zIndexOffset={isSelected ? 1000 : 0} // Garante que o vermelho fique na frente dos azuis
+              zIndexOffset={isSelected ? 1000 : 0}
             >
               <Popup>
                 <strong>{evento.titulo}</strong><br/>
                 <button 
                   className="popup-btn" 
+                  aria-label={`Ver detalhes de ${evento.titulo}`}
                   onClick={(e) => { 
                     e.stopPropagation(); 
                     if (onViewDetails) onViewDetails(evento.id, evento.titulo); 
                   }}
                 >
-                  Ver Detalhes
+                  Ver detalhes
                 </button>
               </Popup>
             </Marker>
@@ -188,7 +181,6 @@ function EventMap({ eventos, isLoading, apiError, onViewDetails, onParticipar, i
 
       <div className={`bottom-sheet ${bottomSheetOpen ? 'open' : 'closed'}`}>
 
-        {/* MOVA O BOTÃO PARA CÁ (DENTRO DA BOTTOM SHEET) */}
         <button className="gps-fab" onClick={requestLocation} title="Minha localização" aria-label="Usar minha localização">
           <LocateFixed aria-hidden="true" className="w-5 h-5" />
         </button>
@@ -212,7 +204,6 @@ function EventMap({ eventos, isLoading, apiError, onViewDetails, onParticipar, i
               const descricao = evento.descricao;
               const isSelected = selectedEventId === evento.id;
               
-              // NOVO: Verifica se o usuário já se inscreveu neste evento
               const isConfirmed = inscricoesConfirmadas.some(inscricao => inscricao.evento === evento.id);
 
               return (
@@ -225,7 +216,6 @@ function EventMap({ eventos, isLoading, apiError, onViewDetails, onParticipar, i
                     <h4 style={{ paddingRight: '20px' }}>{titulo}</h4>
                     <p>{descricao?.substring(0, 60)}...</p>
                     
-                    {/* Botão sutil de Fechar (X) */}
                     {isSelected && (
                       <button 
                         onClick={(e) => { e.stopPropagation(); setSelectedEventId(null); }}
@@ -240,27 +230,28 @@ function EventMap({ eventos, isLoading, apiError, onViewDetails, onParticipar, i
                   
                   {isSelected && (
                     <div className="card-actions slide-down">
-                      {/* Trocamos o botão fechar por "Ver Detalhes" para otimizar espaço */}
                       <button 
                         className="btn-fechar" 
                         style={{ background: '#e0f2fe', color: '#0369a1' }}
+                        aria-label={`Ver detalhes de ${titulo}`}
                         onClick={(e) => { 
                           e.stopPropagation(); 
                           if (onViewDetails) onViewDetails(evento.id, titulo); 
                         }}
                       >
-                        Ver Detalhes
+                        Ver detalhes
                       </button>
 
                       <button 
                         className="btn-quero-ajudar" 
+                        aria-label={isConfirmed ? `Cancelar inscrição em ${titulo}` : `Participar de ${titulo}`}
                         onClick={(e) => { 
                           e.stopPropagation(); 
                           if (onParticipar) onParticipar(evento.id); 
                         }}
                         style={isConfirmed ? { backgroundColor: '#fee2e2', color: '#dc2626' } : {}}
                       >
-                        {isConfirmed ? 'Cancelar inscrição' : 'Quero Ajudar'}
+                        {isConfirmed ? 'Cancelar inscrição' : 'Quero ajudar'}
                       </button>
                     </div>
                   )}

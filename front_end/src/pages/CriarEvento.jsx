@@ -4,6 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { AlertTriangle, CheckCircle } from 'lucide-react';
 import { createEvento, updateEvento, getEvento } from '../api';
 import Button from '../components/ui/Button.jsx';
+import Input from '../components/ui/Input.jsx';
 import LoadingState from '../components/ui/LoadingState.jsx';
 
 export default function CriarEvento() {
@@ -141,93 +142,129 @@ export default function CriarEvento() {
           </div>
 
           {/* Formulário */}
-          <form onSubmit={handleSubmit} className="p-8 md:p-10">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <form onSubmit={handleSubmit} className="p-6 md:p-10">
+            <div className="space-y-8 mb-8">
               
-              <div className="md:col-span-2">
-                <label className="block text-sm font-bold text-slate-700 mb-2">Título do Projeto</label>
-                <input 
-                  type="text" name="titulo" value={eventForm.titulo} onChange={onFormChange} required placeholder="Ex: Feira de Saúde Comunitária"
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all text-slate-700 placeholder-slate-400 bg-slate-50 focus:bg-white" 
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-bold text-slate-700 mb-2">Categoria</label>
-                <select 
-                  name="categoria" value={eventForm.categoria} onChange={onFormChange} required
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all text-slate-700 bg-slate-50 focus:bg-white appearance-none cursor-pointer"
-                >
-                  <option value="saude">Saúde</option>
-                  <option value="educacao">Educação</option>
-                  <option value="cultura">Cultura</option>
-                  <option value="esporte">Esporte</option>
-                  <option value="assistencia_social">Assistência Social</option>
-                  <option value="meio_ambiente">Meio Ambiente</option>
-                  <option value="tecnologia">Tecnologia</option>
-                  <option value="outro">Outro</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-bold text-slate-700 mb-2">Vagas Disponíveis</label>
-                <input 
-                  type="number" name="vagas" min="1" step="1" value={eventForm.vagas} onChange={onFormChange} required
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all text-slate-700 bg-slate-50 focus:bg-white" 
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-bold text-slate-700 mb-2">Data e Hora</label>
-                <input 
-                  type="datetime-local" name="data_hora" value={eventForm.data_hora} onChange={onFormChange} required
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all text-slate-700 bg-slate-50 focus:bg-white cursor-pointer" 
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-bold text-slate-700 mb-2">Rede Social ou Comprovação</label>
-                <input 
-                  type="url" name="link_comprovacao" value={eventForm.link_comprovacao} onChange={onFormChange} required placeholder="https://instagram.com/sua_ong"
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all text-slate-700 placeholder-slate-400 bg-slate-50 focus:bg-white" 
-                />
-              </div>
-
-              <div className="md:col-span-2">
-                <label className="block text-sm font-bold text-slate-700 mb-2">Nome do Local ou Endereço</label>
-                <input 
-                  type="text" name="endereco_texto" value={eventForm.endereco_texto} onChange={onFormChange} required placeholder="Ex: Praça Central, Centro"
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all text-slate-700 placeholder-slate-400 bg-slate-50 focus:bg-white" 
-                />
-              </div>
-
-              {/* Mudei o label deste aqui para ficar mais claro */}
-              <div className="md:col-span-2">
-                <label className="block text-sm font-bold text-slate-700 mb-2">Pino no Mapa (Coordenada Oculta)</label>
-                <div className="w-full bg-slate-50 border border-slate-200 rounded-xl focus-within:ring-2 focus-within:ring-emerald-500 focus-within:bg-white transition-all overflow-hidden">
-                  <AddressAutocomplete value={address} onChange={setAddress} />
+              <section className="rounded-2xl border border-slate-100 bg-slate-50/70 p-5">
+                <div className="mb-5">
+                  <h2 className="text-lg font-extrabold text-slate-800">Informações básicas</h2>
+                  <p className="text-sm text-slate-500">Nome e categoria principal da iniciativa.</p>
                 </div>
-              </div>  
 
-              
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <Input
+                    label="Título do Projeto"
+                    type="text"
+                    name="titulo"
+                    value={eventForm.titulo}
+                    onChange={onFormChange}
+                    required
+                    placeholder="Ex: Feira de Saúde Comunitária"
+                    className="md:col-span-2"
+                  />
 
-              <div className="md:col-span-2">
-                <label className="block text-sm font-bold text-slate-700 mb-2">Descrição da Iniciativa</label>
-                <textarea 
-                  name="descricao" value={eventForm.descricao} onChange={onFormChange} required rows="5" placeholder="Descreva o objetivo, o público..."
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all text-slate-700 placeholder-slate-400 bg-slate-50 focus:bg-white resize-y"
-                ></textarea>
-              </div>
+                  <div>
+                    <label className="block text-sm font-bold text-slate-700 mb-2">Categoria</label>
+                    <select 
+                      name="categoria" value={eventForm.categoria} onChange={onFormChange} required
+                      className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all text-slate-700 bg-white md:bg-slate-50 focus:bg-white appearance-none cursor-pointer"
+                    >
+                      <option value="saude">Saúde</option>
+                      <option value="educacao">Educação</option>
+                      <option value="cultura">Cultura</option>
+                      <option value="esporte">Esporte</option>
+                      <option value="assistencia_social">Assistência Social</option>
+                      <option value="meio_ambiente">Meio Ambiente</option>
+                      <option value="tecnologia">Tecnologia</option>
+                      <option value="outro">Outro</option>
+                    </select>
+                  </div>
+
+                  <Input
+                    label="Vagas Disponíveis"
+                    type="number"
+                    name="vagas"
+                    min="1"
+                    step="1"
+                    value={eventForm.vagas}
+                    onChange={onFormChange}
+                    required
+                  />
+                </div>
+              </section>
+
+              <section className="rounded-2xl border border-slate-100 bg-slate-50/70 p-5">
+                <div className="mb-5">
+                  <h2 className="text-lg font-extrabold text-slate-800">Data e local</h2>
+                  <p className="text-sm text-slate-500">Informe quando acontecerá e como o projeto aparecerá no mapa.</p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <Input
+                    label="Data e Hora"
+                    type="datetime-local"
+                    name="data_hora"
+                    value={eventForm.data_hora}
+                    onChange={onFormChange}
+                    required
+                    inputClassName="cursor-pointer"
+                  />
+
+                  <Input
+                    label="Nome do Local ou Endereço"
+                    type="text"
+                    name="endereco_texto"
+                    value={eventForm.endereco_texto}
+                    onChange={onFormChange}
+                    required
+                    placeholder="Ex: Praça Central, Centro"
+                  />
+
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-bold text-slate-700 mb-2">Pino no Mapa (Coordenada Oculta)</label>
+                    <div className="w-full bg-white md:bg-slate-50 border border-slate-200 rounded-xl focus-within:ring-2 focus-within:ring-emerald-500 focus-within:bg-white transition-all overflow-hidden">
+                      <AddressAutocomplete value={address} onChange={setAddress} />
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <section className="rounded-2xl border border-slate-100 bg-slate-50/70 p-5">
+                <div className="mb-5">
+                  <h2 className="text-lg font-extrabold text-slate-800">Descrição e comprovação</h2>
+                  <p className="text-sm text-slate-500">Explique o objetivo e informe o link usado para acompanhamento.</p>
+                </div>
+
+                <div className="grid grid-cols-1 gap-6">
+                  <Input
+                    label="Rede Social ou Comprovação"
+                    type="url"
+                    name="link_comprovacao"
+                    value={eventForm.link_comprovacao}
+                    onChange={onFormChange}
+                    required
+                    placeholder="https://instagram.com/sua_ong"
+                  />
+
+                  <div>
+                    <label className="block text-sm font-bold text-slate-700 mb-2">Descrição da Iniciativa</label>
+                    <textarea 
+                      name="descricao" value={eventForm.descricao} onChange={onFormChange} required rows="5" placeholder="Descreva o objetivo, o público..."
+                      className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all text-slate-700 placeholder-slate-400 bg-white md:bg-slate-50 focus:bg-white resize-y"
+                    ></textarea>
+                  </div>
+                </div>
+              </section>
             </div>
 
             {createError && (
-              <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-600 rounded-xl flex items-start gap-3">
+              <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-600 rounded-xl flex items-start gap-3" role="alert">
                 <AlertTriangle aria-hidden="true" className="w-5 h-5 shrink-0" />
                 <p className="text-sm font-medium">{createError}</p>
               </div>
             )}
             {createSuccess && (
-              <div className="mb-6 p-4 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl flex items-start gap-3">
+              <div className="mb-6 p-4 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl flex items-start gap-3" role="status" aria-live="polite">
                 <CheckCircle aria-hidden="true" className="w-5 h-5 shrink-0" />
                 <p className="text-sm font-medium">{createSuccess}</p>
               </div>

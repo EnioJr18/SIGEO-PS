@@ -122,13 +122,13 @@ export default function Cadastro({ onSubmit, registerError, registerSuccess }) {
 
           {/* Avisos de Erro / Sucesso */}
           {(localError || registerError) && (
-            <div className="p-4 bg-red-50 border border-red-200 text-red-600 rounded-xl text-sm font-medium flex items-start gap-2">
+            <div className="p-4 bg-red-50 border border-red-200 text-red-600 rounded-xl text-sm font-medium flex items-start gap-2" role="alert">
               <AlertTriangle aria-hidden="true" className="w-5 h-5 shrink-0" />
               {localError || registerError}
             </div>
           )}
           {registerSuccess && (
-            <div className="p-4 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl text-sm font-medium flex items-start gap-2">
+            <div className="p-4 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl text-sm font-medium flex items-start gap-2" role="status" aria-live="polite">
               <CheckCircle aria-hidden="true" className="w-5 h-5 shrink-0" />
               {registerSuccess}
             </div>
@@ -148,11 +148,11 @@ export default function Cadastro({ onSubmit, registerError, registerSuccess }) {
         <div className="mt-8 text-center space-y-4">
           <p className="text-slate-500 text-sm">
             Já tem uma conta?{' '}
-            <button onClick={() => navigate('/login')} className="text-emerald-600 font-bold hover:underline">
+            <button onClick={() => navigate('/login')} className="text-emerald-600 font-bold hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 rounded">
               Entrar
             </button>
           </p>
-          <button onClick={() => navigate('/')} className="text-slate-400 text-sm hover:text-slate-600 transition-colors font-medium">
+          <button onClick={() => navigate('/')} className="text-slate-400 text-sm hover:text-slate-600 transition-colors font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 rounded">
             &larr; Voltar para o início
           </button>
         </div>

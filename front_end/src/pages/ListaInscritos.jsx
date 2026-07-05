@@ -6,6 +6,25 @@ import Button from '../components/ui/Button.jsx';
 import EmptyState from '../components/ui/EmptyState.jsx';
 import LoadingState from '../components/ui/LoadingState.jsx';
 
+const statusStyles = {
+  confirmada: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+  confirmado: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+  pendente: 'bg-amber-50 text-amber-700 border-amber-200',
+  cancelada: 'bg-red-50 text-red-700 border-red-200',
+};
+
+function StatusBadge({ status }) {
+  const normalizedStatus = String(status || 'confirmada').toLowerCase();
+  const label = status || 'Confirmado';
+
+  return (
+    <span className={`inline-flex items-center gap-1.5 py-1 px-3 rounded-full text-xs font-bold border ${statusStyles[normalizedStatus] || statusStyles.confirmada}`}>
+      <span className="w-1.5 h-1.5 rounded-full bg-current" aria-hidden="true" />
+      {label}
+    </span>
+  );
+}
+
 const ListaInscritos = () => {
   const { id } = useParams(); // Pega o ID do evento na URL
   const navigate = useNavigate();
@@ -29,16 +48,34 @@ const ListaInscritos = () => {
   }, [id]);
 
   return (
-    <div className="max-w-4xl mx-auto mt-10 p-4 sm:p-6 bg-white rounded-3xl shadow-sm border border-slate-100">
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
-        <div>
-          <h2 className="text-2xl font-extrabold text-slate-800">Voluntários Inscritos</h2>
-          <p className="text-sm text-slate-500 mt-1">Acompanhe participantes confirmados neste projeto.</p>
+    <div className="min-h-screen bg-slate-50 py-10">
+      <div className="container mx-auto px-4 max-w-5xl">
+        <div className="mb-6 rounded-3xl bg-gradient-to-r from-slate-900 to-blue-900 p-6 md:p-8 text-white shadow-lg">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
+            <div>
+              <span className="inline-flex items-center gap-2 rounded-full bg-white/10 border border-white/15 px-3 py-1 text-xs font-bold text-blue-100 mb-4">
+                <Users aria-hidden="true" className="w-4 h-4" />
+                Lista do projeto
+              </span>
+              <h2 className="text-2xl md:text-3xl font-extrabold">Voluntários Inscritos</h2>
+              <p className="text-sm md:text-base text-blue-100 mt-2 max-w-2xl">Acompanhe participantes confirmados neste projeto.</p>
+            </div>
+            <Button onClick={() => navigate(-1)} variant="secondary" size="md" className="bg-white text-slate-800 hover:bg-blue-50">
+              Voltar
+            </Button>
+          </div>
         </div>
-        <Button onClick={() => navigate(-1)} variant="ghost" size="md">
-          Voltar
-        </Button>
-      </div>
+
+        <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-4 sm:p-6">
+          <div className="flex items-center justify-between gap-4 mb-6">
+            <div>
+              <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Total de inscritos</p>
+              <strong className="text-3xl font-extrabold text-slate-900">{inscritos.length}</strong>
+            </div>
+            <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center">
+              <Users aria-hidden="true" className="w-6 h-6" />
+            </div>
+          </div>
 
       {loading ? (
         <LoadingState text="Carregando inscritos..." />
@@ -53,7 +90,7 @@ const ListaInscritos = () => {
         <>
         <div className="grid gap-3 md:hidden">
           {inscritos.map((insc) => (
-            <div key={insc.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+            <div key={insc.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-4 shadow-sm">
               <div className="flex items-start gap-3">
                 <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-lg shrink-0">
                   {insc.participante_nome ? insc.participante_nome.charAt(0).toUpperCase() : 'V'}
@@ -70,20 +107,23 @@ const ListaInscritos = () => {
                     <Calendar aria-hidden="true" className="w-4 h-4 shrink-0" />
                     {new Date(insc.data_inscricao).toLocaleDateString('pt-BR')}
                   </p>
+                  <div className="mt-3">
+                    <StatusBadge status={insc.status} />
+                  </div>
                 </div>
               </div>
             </div>
           ))}
         </div>
 
-        <div className="hidden md:block overflow-x-auto">
+        <div className="hidden md:block overflow-x-auto rounded-2xl border border-slate-200">
          <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-200">
-                <th className="p-4 font-bold text-slate-600">Voluntário</th>
-                <th className="p-4 font-bold text-slate-600 hidden sm:table-cell">E-mail de Contato</th>
-                <th className="p-4 font-bold text-slate-600 text-center">Data</th>
-                <th className="p-4 font-bold text-slate-600 text-right">Status</th>
+                <th className="p-4 font-bold text-slate-600 text-sm uppercase tracking-wider">Voluntário</th>
+                <th className="p-4 font-bold text-slate-600 text-sm uppercase tracking-wider hidden sm:table-cell">E-mail de contato</th>
+                <th className="p-4 font-bold text-slate-600 text-sm uppercase tracking-wider text-center">Data</th>
+                <th className="p-4 font-bold text-slate-600 text-sm uppercase tracking-wider text-right">Status</th>
               </tr>
             </thead>
             <tbody>
@@ -120,10 +160,7 @@ const ListaInscritos = () => {
 
                   {/* Coluna: Status */}
                   <td className="p-4 text-right">
-                    <span className="inline-flex items-center gap-1.5 py-1 px-3 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" aria-hidden="true"></span>
-                      Confirmado
-                    </span>
+                    <StatusBadge status={insc.status} />
                   </td>
 
                 </tr>
@@ -133,6 +170,8 @@ const ListaInscritos = () => {
         </div>
         </>
       )}
+        </div>
+      </div>
     </div>
   );
 };

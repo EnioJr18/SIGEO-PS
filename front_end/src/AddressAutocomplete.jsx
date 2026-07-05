@@ -63,6 +63,7 @@ function AddressAutocomplete({ value, onChange, placeholder = 'Rua, Bairro, Cida
         <input
           type="text"
           placeholder={placeholder}
+          aria-label="Buscar endereço do projeto"
           value={value}
           onChange={(event) => {
             onChange(event.target.value)
@@ -74,7 +75,7 @@ function AddressAutocomplete({ value, onChange, placeholder = 'Rua, Bairro, Cida
           }}
           autoComplete="off"
         />
-        {isLoading && <small className="form-note">Buscando sugestões de endereço...</small>}
+        {isLoading && <small className="form-note" role="status" aria-live="polite">Buscando sugestões de endereço...</small>}
       </div>
 
       {showSuggestions && (
@@ -84,6 +85,7 @@ function AddressAutocomplete({ value, onChange, placeholder = 'Rua, Bairro, Cida
               <button
                 type="button"
                 className="address-suggestion"
+                aria-label={`Selecionar endereço ${suggestion.display_name}`}
                 onMouseDown={(event) => event.preventDefault()}
                 onClick={() => handleSelect(suggestion)}
               >

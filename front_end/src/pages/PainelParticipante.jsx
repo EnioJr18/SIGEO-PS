@@ -4,6 +4,7 @@ import { AlertTriangle, Calendar, CalendarDays, CalendarX, CheckCircle, Clock3, 
 import { cancelarInscricao, getPerfil, updatePerfil, deletePerfil, getMinhasInscricoes } from '../api';
 import Button from '../components/ui/Button.jsx';
 import EmptyState from '../components/ui/EmptyState.jsx';
+import Input from '../components/ui/Input.jsx';
 import LoadingState from '../components/ui/LoadingState.jsx';
 
 const statusStyles = {
@@ -139,27 +140,31 @@ export default function PainelParticipante() {
       <div className="container mx-auto px-4 max-w-4xl">
         
         {/* Cabeçalho */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-extrabold text-slate-900 mb-2">Painel do Voluntário</h1>
-          <p className="text-slate-600 text-lg">Acompanhe sua agenda, seu histórico de impacto e gerencie sua conta.</p>
+        <div className="mb-8 rounded-3xl bg-gradient-to-r from-slate-900 to-blue-900 p-6 md:p-8 text-white shadow-lg">
+          <span className="inline-flex items-center gap-2 rounded-full bg-white/10 border border-white/15 px-3 py-1 text-xs font-bold text-blue-100 mb-4">
+            <Sprout aria-hidden="true" className="w-4 h-4" />
+            Área do participante
+          </span>
+          <h1 className="text-3xl md:text-4xl font-extrabold mb-2">Painel do Voluntário</h1>
+          <p className="text-blue-100 text-lg max-w-2xl">Acompanhe sua agenda, seu histórico de impacto e gerencie sua conta.</p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-          <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+          <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between mb-3">
               <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Próximos eventos</span>
               <CalendarDays aria-hidden="true" className="w-5 h-5 text-emerald-600" />
             </div>
             <strong className="text-3xl font-extrabold text-slate-900">{agenda.length}</strong>
           </div>
-          <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+          <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between mb-3">
               <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Histórico</span>
               <History aria-hidden="true" className="w-5 h-5 text-blue-600" />
             </div>
             <strong className="text-3xl font-extrabold text-slate-900">{historico.length}</strong>
           </div>
-          <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+          <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between mb-3">
               <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Conta</span>
               <Settings aria-hidden="true" className="w-5 h-5 text-slate-600" />
@@ -169,24 +174,30 @@ export default function PainelParticipante() {
         </div>
 
         {/* Sistema de Abas (Tabs) */}
-        <div className="flex flex-wrap gap-2 mb-8 border-b border-slate-200 pb-4">
+        <div className="flex flex-wrap gap-2 mb-8 border-b border-slate-200 pb-4" role="tablist" aria-label="Seções do painel do participante">
           <button 
             onClick={() => setActiveTab('agenda')}
-            className={`px-6 py-2.5 rounded-full font-bold transition-all ${activeTab === 'agenda' ? 'bg-emerald-600 text-white shadow-md' : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'}`}
+            role="tab"
+            aria-selected={activeTab === 'agenda'}
+            className={`px-6 py-2.5 rounded-full font-bold transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 ${activeTab === 'agenda' ? 'bg-emerald-600 text-white shadow-md' : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'}`}
           >
             <CalendarDays aria-hidden="true" className="w-4 h-4 inline-block mr-2" />
             Minha Agenda
           </button>
           <button 
             onClick={() => setActiveTab('historico')}
-            className={`px-6 py-2.5 rounded-full font-bold transition-all ${activeTab === 'historico' ? 'bg-emerald-600 text-white shadow-md' : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'}`}
+            role="tab"
+            aria-selected={activeTab === 'historico'}
+            className={`px-6 py-2.5 rounded-full font-bold transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 ${activeTab === 'historico' ? 'bg-emerald-600 text-white shadow-md' : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'}`}
           >
             <History aria-hidden="true" className="w-4 h-4 inline-block mr-2" />
             Histórico de Impacto
           </button>
           <button 
             onClick={() => setActiveTab('perfil')}
-            className={`px-6 py-2.5 rounded-full font-bold transition-all ${activeTab === 'perfil' ? 'bg-slate-800 text-white shadow-md' : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'}`}
+            role="tab"
+            aria-selected={activeTab === 'perfil'}
+            className={`px-6 py-2.5 rounded-full font-bold transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-600 ${activeTab === 'perfil' ? 'bg-slate-800 text-white shadow-md' : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'}`}
           >
             <Settings aria-hidden="true" className="w-4 h-4 inline-block mr-2" />
             Configurações
@@ -195,7 +206,7 @@ export default function PainelParticipante() {
 
         {/* Feedback de Mensagens */}
         {mensagem.texto && (
-          <div className={`mb-6 p-4 rounded-xl flex items-start gap-3 border ${mensagem.tipo === 'erro' ? 'bg-red-50 border-red-200 text-red-600' : 'bg-emerald-50 border-emerald-200 text-emerald-700'}`}>
+          <div className={`mb-6 p-4 rounded-xl flex items-start gap-3 border ${mensagem.tipo === 'erro' ? 'bg-red-50 border-red-200 text-red-600' : 'bg-emerald-50 border-emerald-200 text-emerald-700'}`} role="status" aria-live="polite">
             {mensagem.tipo === 'erro'
               ? <AlertTriangle aria-hidden="true" className="w-5 h-5 shrink-0" />
               : <CheckCircle aria-hidden="true" className="w-5 h-5 shrink-0" />}
@@ -207,16 +218,16 @@ export default function PainelParticipante() {
             CONTEÚDO DA ABA: AGENDA
         ========================================= */}
         {activeTab === 'agenda' && (
-          <div className="space-y-4">
+          <div className="space-y-4" role="tabpanel">
             {agenda.length === 0 ? (
               <EmptyState
                 icon={CalendarX}
                 title="Sua agenda está livre"
                 description="Você ainda não está inscrito em nenhum evento futuro."
                 action={(
-                  <Link to="/projetos" className="inline-block px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-full transition-colors">
+                  <Button as={Link} to="/projetos">
                     Explorar Projetos
-                  </Link>
+                  </Button>
                 )}
               />
             ) : (
@@ -255,7 +266,7 @@ export default function PainelParticipante() {
             CONTEÚDO DA ABA: HISTÓRICO
         ========================================= */}
         {activeTab === 'historico' && (
-          <div className="space-y-4">
+          <div className="space-y-4" role="tabpanel">
             {historico.length === 0 ? (
               <EmptyState
                 icon={Sprout}
@@ -287,26 +298,28 @@ export default function PainelParticipante() {
             CONTEÚDO DA ABA: PERFIL
         ========================================= */}
         {activeTab === 'perfil' && (
-          <div className="space-y-8">
+          <div className="space-y-8" role="tabpanel">
             <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm">
               <h2 className="text-2xl font-bold text-slate-800 mb-6">Informações Pessoais</h2>
               
               <form onSubmit={handleSalvarPerfil}>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                  <div>
-                    <label className="block text-sm font-bold text-slate-700 mb-2">Nome de Exibição</label>
-                    <input 
-                      type="text" name="first_name" value={perfil.first_name} onChange={handlePerfilChange} required
-                      className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none text-slate-700 bg-slate-50 focus:bg-white transition-all" 
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-bold text-slate-700 mb-2">E-mail de Contato</label>
-                    <input 
-                      type="email" name="email" value={perfil.email} onChange={handlePerfilChange} required
-                      className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none text-slate-700 bg-slate-50 focus:bg-white transition-all" 
-                    />
-                  </div>
+                  <Input
+                    label="Nome de exibição"
+                    type="text"
+                    name="first_name"
+                    value={perfil.first_name}
+                    onChange={handlePerfilChange}
+                    required
+                  />
+                  <Input
+                    label="E-mail de contato"
+                    type="email"
+                    name="email"
+                    value={perfil.email}
+                    onChange={handlePerfilChange}
+                    required
+                  />
                 </div>
                 <div className="flex justify-end">
                   <Button type="submit" variant="secondary" size="lg" className="bg-slate-800 hover:bg-slate-700 text-white border-slate-800">
