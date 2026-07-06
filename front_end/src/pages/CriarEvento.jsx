@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import AddressAutocomplete from '../AddressAutocomplete.jsx';
 import { useNavigate, useParams } from 'react-router-dom';
-import { AlertTriangle, CheckCircle } from 'lucide-react';
-import { createEvento, updateEvento, getEvento } from '../api';
+import { AlertTriangle, CheckCircle, Sparkles } from 'lucide-react';
+import { createEvento, updateEvento, getEvento, sugerirDescricaoEvento } from '../api';
 import Button from '../components/ui/Button.jsx';
 import Input from '../components/ui/Input.jsx';
 import LoadingState from '../components/ui/LoadingState.jsx';
@@ -23,11 +23,17 @@ export default function CriarEvento() {
     endereco_texto: ''
   });
   const [address, setAddress] = useState('');
+  const [selectedLocation, setSelectedLocation] = useState(null);
+  const [locationError, setLocationError] = useState('');
   
   // Estados para feedback visual
   const [loading, setLoading] = useState(isEditMode);
   const [createError, setCreateError] = useState('');
   const [createSuccess, setCreateSuccess] = useState('');
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState('');
+  const [aiSuggestion, setAiSuggestion] = useState('');
+  const [aiSuggestionSource, setAiSuggestionSource] = useState('');
 
 // Efeito para carregar os dados se for edição
   useEffect(() => {
@@ -45,17 +51,17 @@ export default function CriarEvento() {
             endereco_texto: data.endereco_texto || ''
           });
           
-          // Limpa a coordenada do banco e inverte para o padrão humano: Latitude, Longitude
-          let loc = data.localizacao || '';
-          if (loc.includes('SRID=')) {
-            const coords = loc.replace('SRID=4326;POINT (', '').replace(')', '').split(' ');
-            if (coords.length === 2) {
-              const lng = coords[0];
-              const lat = coords[1];
-              loc = `${lat}, ${lng}`; // Aqui a mágica acontece: Lat na frente!
-            }
+          const locationMatch = String(data.localizacao || '').match(/POINT\s*\((-?\d+(?:\.\d+)?)\s+(-?\d+(?:\.\d+)?)\)/i);
+          const locationLabel = data.endereco_texto || data.endereco || '';
+          setAddress(locationLabel);
+
+          if (locationMatch) {
+            setSelectedLocation({
+              label: locationLabel,
+              longitude: Number(locationMatch[1]),
+              latitude: Number(locationMatch[2]),
+            });
           }
-          setAddress(loc);
 
         } catch (error) {
           console.error("Erro ao carregar projeto:", error);
@@ -76,26 +82,65 @@ export default function CriarEvento() {
     });
   };
 
+  const handleSuggestDescription = async () => {
+    setAiLoading(true);
+    setAiError('');
+    setAiSuggestion('');
+    setAiSuggestionSource('');
+
+    try {
+      const data = await sugerirDescricaoEvento({
+        titulo: eventForm.titulo,
+        categoria: eventForm.categoria,
+        local: eventForm.endereco_texto || address,
+        data: eventForm.data_hora,
+        descricao_atual: eventForm.descricao,
+      });
+
+      if (!data.sugestao) {
+        throw new Error('Não foi possível gerar a sugestão agora. Você ainda pode preencher a descrição manualmente.');
+      }
+
+      setAiSuggestion(data.sugestao);
+      setAiSuggestionSource(data.fonte || '');
+    } catch (error) {
+      setAiError(error.message || 'Não foi possível gerar a sugestão agora. Você ainda pode preencher a descrição manualmente.');
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
+  const handleUseSuggestion = () => {
+    setEventForm((current) => ({
+      ...current,
+      descricao: aiSuggestion,
+    }));
+    setAiSuggestion('');
+    setAiSuggestionSource('');
+  };
+
   // Função para salvar (Criar ou Atualizar)
   const handleSubmit = async (e) => {
     e.preventDefault();
     setCreateError('');
     setCreateSuccess('');
+    setLocationError('');
 
-    // Se a coordenada estiver limpa (com vírgula), invertemos de volta para Longitude, Latitude (X Y) para o Django
-    let finalLocation = address;
-    if (finalLocation && !finalLocation.includes('SRID') && finalLocation.includes(',')) {
-      const parts = finalLocation.split(',');
-      if (parts.length === 2) {
-        const lat = parts[0].trim();
-        const lng = parts[1].trim();
-        finalLocation = `SRID=4326;POINT(${lng} ${lat})`; // Lng na frente para o PostGIS!
-      }
+    const latitude = Number(selectedLocation?.latitude);
+    const longitude = Number(selectedLocation?.longitude);
+
+    if (!selectedLocation || !Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+      setLocationError('Selecione um endereço válido na lista para marcar o ponto no mapa.');
+      return;
     }
 
     const payload = {
       ...eventForm,
-      localizacao: finalLocation 
+      vagas: Number(eventForm.vagas),
+      endereco_texto: eventForm.endereco_texto.trim() || selectedLocation.label,
+      latitude,
+      longitude,
+      localizacao: `SRID=4326;POINT(${longitude} ${latitude})`,
     };
 
     try {
@@ -221,10 +266,35 @@ export default function CriarEvento() {
                   />
 
                   <div className="md:col-span-2">
-                    <label className="block text-sm font-bold text-slate-700 mb-2">Pino no Mapa (Coordenada Oculta)</label>
+                    <label className="block text-sm font-bold text-slate-700 mb-2">Local marcado no mapa</label>
                     <div className="w-full bg-white md:bg-slate-50 border border-slate-200 rounded-xl focus-within:ring-2 focus-within:ring-emerald-500 focus-within:bg-white transition-all overflow-hidden">
-                      <AddressAutocomplete value={address} onChange={setAddress} />
+                      <AddressAutocomplete
+                        value={address}
+                        onChange={(nextValue) => {
+                          setAddress(nextValue);
+                          setSelectedLocation(null);
+                          setLocationError('');
+                        }}
+                        onSelect={(suggestion) => {
+                          setSelectedLocation(suggestion);
+                          setLocationError('');
+                        }}
+                        placeholder="Digite bairro, cidade e estado para buscar o local"
+                      />
                     </div>
+                    <p className="mt-2 text-xs font-medium text-slate-500">
+                      Selecione uma sugestão para marcar o local no mapa.
+                    </p>
+                    {selectedLocation && (
+                      <p className="mt-2 rounded-xl border border-emerald-100 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700" role="status">
+                        Endereço selecionado: {selectedLocation.label}
+                      </p>
+                    )}
+                    {locationError && (
+                      <p className="mt-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-600" role="alert">
+                        {locationError}
+                      </p>
+                    )}
                   </div>
                 </div>
               </section>
@@ -252,6 +322,72 @@ export default function CriarEvento() {
                       name="descricao" value={eventForm.descricao} onChange={onFormChange} required rows="5" placeholder="Descreva o objetivo, o público..."
                       className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all text-slate-700 placeholder-slate-400 bg-white md:bg-slate-50 focus:bg-white resize-y"
                     ></textarea>
+                  </div>
+
+                  <div className="rounded-2xl border border-emerald-100 bg-white p-5 shadow-sm">
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                      <div>
+                        <h3 className="flex items-center gap-2 text-base font-extrabold text-slate-800">
+                          <Sparkles aria-hidden="true" className="h-5 w-5 text-emerald-600" />
+                          Ajuda da IA
+                        </h3>
+                        <p className="mt-1 text-sm text-slate-500">
+                          Use a IA para sugerir ou melhorar a descrição do projeto.
+                        </p>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        onClick={handleSuggestDescription}
+                        disabled={aiLoading}
+                        className="w-full border-emerald-200 text-emerald-700 hover:bg-emerald-50 sm:w-auto"
+                      >
+                        <Sparkles aria-hidden="true" className="h-4 w-4" />
+                        {aiLoading
+                          ? 'Gerando sugestão...'
+                          : eventForm.descricao.trim()
+                            ? 'Melhorar descrição'
+                            : 'Sugerir descrição'}
+                      </Button>
+                    </div>
+
+                    {aiError && (
+                      <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm font-medium text-red-600" role="alert">
+                        {aiError}
+                      </div>
+                    )}
+
+                    {aiLoading && (
+                      <div className="mt-4 rounded-xl border border-emerald-100 bg-emerald-50 p-3 text-sm font-semibold text-emerald-700" role="status" aria-live="polite">
+                        Gerando sugestão...
+                      </div>
+                    )}
+
+                    {aiSuggestion && (
+                      <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4" role="status" aria-live="polite">
+                        {aiSuggestionSource === 'fallback' && (
+                          <p className="mb-3 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-700">
+                            Geramos uma sugestão básica porque a IA está temporariamente indisponível.
+                          </p>
+                        )}
+                        <p className="text-sm leading-6 text-slate-700 whitespace-pre-line">{aiSuggestion}</p>
+                        <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:justify-end">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            onClick={() => {
+                              setAiSuggestion('');
+                              setAiSuggestionSource('');
+                            }}
+                          >
+                            Descartar
+                          </Button>
+                          <Button type="button" onClick={handleUseSuggestion}>
+                            Usar sugestão
+                          </Button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </section>

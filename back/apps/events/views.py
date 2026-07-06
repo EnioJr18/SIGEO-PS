@@ -155,7 +155,7 @@ class ImpactoSocialView(APIView):
         proximos_eventos = list(
             eventos.filter(data_hora__gte=hoje, cancelado=False)
             .order_by('data_hora')
-            .values('id', 'titulo', 'categoria', 'data_hora')[:5]
+            .values('id', 'titulo', 'categoria', 'data_hora', 'endereco_texto')[:5]
         )
 
         media_avaliacao = avaliacoes.aggregate(media=Avg('nota'))['media']

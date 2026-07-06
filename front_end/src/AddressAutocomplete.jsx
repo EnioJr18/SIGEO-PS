@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 
-function AddressAutocomplete({ value, onChange, placeholder = 'Rua, Bairro, Cidade, Estado' }) {
+function AddressAutocomplete({ value, onChange, onSelect, placeholder = 'Rua, Bairro, Cidade, Estado' }) {
   const [suggestions, setSuggestions] = useState([])
   const [isOpen, setIsOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
@@ -31,7 +31,18 @@ function AddressAutocomplete({ value, onChange, placeholder = 'Rua, Bairro, Cida
           return
         }
 
-        setSuggestions(Array.isArray(data) ? data : [])
+        const normalizedSuggestions = Array.isArray(data)
+          ? data
+              .map((item) => ({
+                id: item.place_id,
+                label: item.display_name || item.name || '',
+                latitude: Number(item.lat),
+                longitude: Number(item.lon),
+              }))
+              .filter((item) => item.label && Number.isFinite(item.latitude) && Number.isFinite(item.longitude))
+          : []
+
+        setSuggestions(normalizedSuggestions)
       } catch {
         if (requestIdRef.current === requestId) {
           setSuggestions([])
@@ -47,7 +58,8 @@ function AddressAutocomplete({ value, onChange, placeholder = 'Rua, Bairro, Cida
   }, [value])
 
   const handleSelect = (suggestion) => {
-    onChange(suggestion.display_name || suggestion.name || value)
+    onChange(suggestion.label)
+    onSelect?.(suggestion)
     setSuggestions([])
     setIsOpen(false)
   }
@@ -81,22 +93,22 @@ function AddressAutocomplete({ value, onChange, placeholder = 'Rua, Bairro, Cida
       {showSuggestions && (
         <ul className="address-suggestions" role="listbox" aria-label="Sugestões de endereço">
           {visibleSuggestions.map((suggestion) => (
-            <li key={`${suggestion.place_id}-${suggestion.display_name}`}>
+            <li key={`${suggestion.id}-${suggestion.label}`}>
               <button
                 type="button"
                 className="address-suggestion"
-                aria-label={`Selecionar endereço ${suggestion.display_name}`}
+                aria-label={`Selecionar endereço ${suggestion.label}`}
                 onMouseDown={(event) => event.preventDefault()}
                 onClick={() => handleSelect(suggestion)}
               >
-                <strong>{suggestion.display_name}</strong>
+                <strong>{suggestion.label}</strong>
               </button>
             </li>
           ))}
         </ul>
       )}
 
-      {showEmptyState && <small className="form-note">Nenhuma sugestão encontrada.</small>}
+      {showEmptyState && <small className="form-note">Nenhum endereço encontrado. Tente informar bairro, cidade e estado.</small>}
     </div>
   )
 }

@@ -201,6 +201,13 @@ export async function getImpactoSocial() {
   return request('/eventos/impacto-social/');
 }
 
+export async function sugerirDescricaoEvento(dados) {
+  return request('/ai/sugerir-descricao-evento/', {
+    method: 'POST',
+    body: JSON.stringify(dados),
+  });
+}
+
 // Função para o Organizador deletar seu próprio evento
 export const deleteEvento = async (eventoId) => {
   await request(`/eventos/${eventoId}/`, {
