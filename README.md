@@ -450,16 +450,16 @@ Contribuições são bem-vindas! Sinta-se à vontade para abrir issues ou enviar
 ## 👨‍💻 Autores
 O ecossistema SIGEO-PS está sendo construído em conjunto pelas equipes de Backend e Frontend:
 
-- Backend e Frontend final (GeoDjango, Inscrições e Infraestrutura): **Enio Jr**
-Link GitHub(**EnioJr**): https://github.com/EnioJr18
-- Backend (Autenticação e Perfis JWT): **Guilherme Pontes**
-Link GitHub(**Guilherme Pontes**): https://github.com/guilhermedopp
-- Frontend (Integração de APIs e UI/UX): **Jean Marcos** e **Kelven Eduardo**
-Link GitHub(**Jean Marcos**): https://github.com/jeanmcorreia
-Link GitHub(**Kelven Eduardo**): https://github.com/Kel3214
-- Engenheiro de Qualidade — **Matheus Henrique**
-Link GitHub(**Matheus Henrique**): https://github.com/mhfp1913
-- Tester (QA funcional) — **Entony Richard**
-Link GitHub(**Entony Richard**): https://github.com/entonyifal
-- Gerente de Projeto — **Victor Galvão**
-Link GitHub(**Victor Galvão**): https://github.com/vgalvaoc
+- Backend e Frontend final (GeoDjango, Inscrições e Infraestrutura): **Enio Jr** <br>
+Link GitHub(**EnioJr**): https://github.com/EnioJr18 <br>
+- Backend (Autenticação e Perfis JWT): **Guilherme Pontes** <br>
+Link GitHub(**Guilherme Pontes**): https://github.com/guilhermedopp <br>
+- Frontend (Integração de APIs e UI/UX): **Jean Marcos** e **Kelven Eduardo** <br>
+Link GitHub(**Jean Marcos**): https://github.com/jeanmcorreia <br>
+Link GitHub(**Kelven Eduardo**): https://github.com/Kel3214 <br>
+- Engenheiro de Qualidade — **Matheus Henrique** <br>
+Link GitHub(**Matheus Henrique**): https://github.com/mhfp1913 <br>
+- Tester (QA funcional) — **Entony Richard** <br>
+Link GitHub(**Entony Richard**): https://github.com/entonyifal <br>
+- Gerente de Projeto — **Victor Galvão** <br>
+Link GitHub(**Victor Galvão**): https://github.com/vgalvaoc <br>
