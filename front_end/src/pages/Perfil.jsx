@@ -44,10 +44,9 @@ export default function Perfil() {
       setMensagem({ tipo: 'sucesso', texto: 'Perfil atualizado com sucesso!' });
       
       // Atualiza o nome no navegador para a Navbar mudar na mesma hora
-      localStorage.setItem("userName", perfil.first_name);
+      localStorage.setItem("userName", perfil.first_name || perfil.email || "Usuário");
       
-      // Um pequeno delay e recarregamos a página para o React puxar o nome novo lá em cima
-      setTimeout(() => window.location.reload(), 1000);
+      window.dispatchEvent(new Event("sigeo:profile-updated"));
     } catch {
       setMensagem({ tipo: 'erro', texto: 'Erro ao atualizar o perfil.' });
     }

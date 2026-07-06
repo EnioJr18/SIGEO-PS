@@ -7,7 +7,7 @@ import ConfirmDialog from '../components/ui/ConfirmDialog.jsx';
 import EmptyState from '../components/ui/EmptyState.jsx';
 import LoadingState from '../components/ui/LoadingState.jsx';
 
-export default function PainelOrganizador({ eventos }) {
+export default function PainelOrganizador({ eventos, onEventosChanged }) {
   const [inscricoes, setInscricoes] = useState(null);
   const [eventoParaExcluir, setEventoParaExcluir] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -57,7 +57,13 @@ export default function PainelOrganizador({ eventos }) {
 
     try {
       await deleteEvento(eventoParaExcluir.id);
-      window.location.reload();
+      await onEventosChanged?.();
+      setInscricoes((current) => (
+        Array.isArray(current)
+          ? current.filter((inscricao) => String(inscricao.evento) !== String(eventoParaExcluir.id))
+          : current
+      ));
+      setEventoParaExcluir(null);
     } catch (error) {
       setErroAcao(error.message || "Não foi possível excluir o projeto.");
       setEventoParaExcluir(null);

@@ -7,7 +7,7 @@ import Button from '../components/ui/Button.jsx';
 import Input from '../components/ui/Input.jsx';
 import LoadingState from '../components/ui/LoadingState.jsx';
 
-export default function CriarEvento() {
+export default function CriarEvento({ onEventoSaved }) {
   const navigate = useNavigate();
   const { id } = useParams(); // Pega o ID da URL
   const isEditMode = !!id;    // Se tem ID, é modo edição (true)
@@ -146,10 +146,12 @@ export default function CriarEvento() {
     try {
       if (isEditMode) {
         await updateEvento(id, payload);
+        await onEventoSaved?.();
         setCreateSuccess("Projeto atualizado com sucesso!");
         setTimeout(() => navigate('/painel'), 1500); // Redireciona após 1.5s
       } else {
         await createEvento(payload);
+        await onEventoSaved?.();
         setCreateSuccess("Projeto publicado com sucesso!");
         setTimeout(() => navigate('/painel'), 1500);
       }
@@ -267,7 +269,7 @@ export default function CriarEvento() {
 
                   <div className="md:col-span-2">
                     <label className="block text-sm font-bold text-slate-700 mb-2">Local marcado no mapa</label>
-                    <div className="w-full bg-white md:bg-slate-50 border border-slate-200 rounded-xl focus-within:ring-2 focus-within:ring-emerald-500 focus-within:bg-white transition-all overflow-hidden">
+                    <div className="w-full bg-white md:bg-slate-50 border border-slate-200 rounded-xl focus-within:ring-2 focus-within:ring-emerald-500 focus-within:bg-white transition-all">
                       <AddressAutocomplete
                         value={address}
                         onChange={(nextValue) => {
@@ -312,7 +314,6 @@ export default function CriarEvento() {
                     name="link_comprovacao"
                     value={eventForm.link_comprovacao}
                     onChange={onFormChange}
-                    required
                     placeholder="https://instagram.com/sua_ong"
                   />
 

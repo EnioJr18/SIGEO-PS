@@ -28,6 +28,7 @@ import Button from '../components/ui/Button.jsx';
 import EmptyState from '../components/ui/EmptyState.jsx';
 import Input from '../components/ui/Input.jsx';
 import LoadingState from '../components/ui/LoadingState.jsx';
+import { getLinkComprovacao } from '../utils/eventos.js';
 
 const valueHighlights = [
   { icon: Compass, label: 'Projetos no mapa' },
@@ -63,6 +64,7 @@ export default function Home({
   handleCategoryFilter,
 }) {
     const navigate = useNavigate();
+    const linkComprovacao = getLinkComprovacao(eventoSelecionado);
   return (
     <>
       {/* ========================================= */}
@@ -145,7 +147,10 @@ export default function Home({
                 eventos={eventos} 
                 isLoading={isLoading} 
                 apiError={apiError} 
-                onViewDetails={(eventoId, titulo) => {
+                onViewDetails={(evento) => {
+                  const eventoId = evento?.id;
+                  const titulo = evento?.titulo || 'projeto';
+                  setEventoSelecionado(evento);
                   setToastMessage(`Lendo detalhes: ${titulo}`);
                   const cardSelecionado = document.getElementById(`evento-card-${eventoId}`);
                   if (cardSelecionado) {
@@ -314,12 +319,12 @@ export default function Home({
                   <LinkIcon aria-hidden="true" className="w-6 h-6 text-slate-500 drop-shadow-sm" />
                   <div>
                     <span className="block text-xs font-bold text-slate-400 mb-1 tracking-wider uppercase">Comprovação</span>
-                    {eventoSelecionado.link_comprovacao ? (
-                      <a href={eventoSelecionado.link_comprovacao} target="_blank" rel="noopener noreferrer" className="font-bold text-blue-600 hover:text-blue-700 hover:underline">
-                        Acessar link
+                    {linkComprovacao ? (
+                      <a href={linkComprovacao} target="_blank" rel="noopener noreferrer" className="font-bold text-blue-600 hover:text-blue-700 hover:underline">
+                        Acessar comprovação
                       </a>
                     ) : (
-                      <span className="font-semibold text-slate-500">Nenhum link exigido</span>
+                      <span className="font-semibold text-slate-500">Nenhum link informado</span>
                     )}
                   </div>
                 </div>

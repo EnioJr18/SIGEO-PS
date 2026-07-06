@@ -1,17 +1,35 @@
-# Pastas e arquivos de ambiente
-.env
+# Backend / Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
 venv/
 env/
-__pycache__/
-*.pyc
+db.sqlite3
+*.sqlite3
+.env
+*.env
+.env.*
+!.env.example
 
-# Node
+# Frontend / Node
 node_modules/
 dist/
 build/
-.next/
-.DS_Store
+.vite/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
 
-# Logs e arquivos de banco de dados
+# Logs and cache
 *.log
-db.sqlite3
+.pytest_cache/
+.coverage
+htmlcov/
+
+# System / IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

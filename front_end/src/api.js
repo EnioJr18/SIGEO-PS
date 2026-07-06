@@ -201,6 +201,13 @@ export async function getImpactoSocial() {
   return request('/eventos/impacto-social/');
 }
 
+export async function geocodificarEndereco(query) {
+  const params = new URLSearchParams();
+  params.set('q', query.trim());
+
+  return request(`/eventos/geocodificar/?${params.toString()}`);
+}
+
 export async function sugerirDescricaoEvento(dados) {
   return request('/ai/sugerir-descricao-evento/', {
     method: 'POST',

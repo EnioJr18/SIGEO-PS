@@ -1,3 +1,8 @@
+import json
+from urllib.error import HTTPError, URLError
+from urllib.parse import urlencode
+from urllib.request import Request, urlopen
+
 from django.contrib.auth import get_user_model
 from django.db.models import Avg, Count
 from django.utils import timezone
@@ -11,6 +16,62 @@ from django.contrib.gis.measure import D
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
+
+
+class GeocodificarEnderecoView(APIView):
+    permission_classes = []
+
+    def get(self, request):
+        query = (request.query_params.get('q') or '').strip()
+
+        if len(query) < 3:
+            return Response([])
+
+        params = urlencode({
+            'format': 'jsonv2',
+            'addressdetails': 1,
+            'limit': 5,
+            'countrycodes': 'br',
+            'q': query,
+        })
+        url = f'https://nominatim.openstreetmap.org/search?{params}'
+        nominatim_request = Request(
+            url,
+            headers={
+                'Accept-Language': 'pt-BR',
+                'User-Agent': 'SIGEO-PS/1.0 (academic project)',
+            },
+        )
+
+        try:
+            with urlopen(nominatim_request, timeout=8) as response:
+                payload = json.loads(response.read().decode('utf-8'))
+        except (HTTPError, URLError, TimeoutError, ValueError):
+            return Response(
+                {'detail': 'Não foi possível buscar endereços agora. Tente novamente em instantes.'},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
+
+        suggestions = []
+        for item in payload if isinstance(payload, list) else []:
+            label = item.get('display_name') or item.get('name') or ''
+
+            try:
+                latitude = float(item.get('lat'))
+                longitude = float(item.get('lon'))
+            except (TypeError, ValueError):
+                continue
+
+            if not label:
+                continue
+
+            suggestions.append({
+                'label': label,
+                'latitude': latitude,
+                'longitude': longitude,
+            })
+
+        return Response(suggestions)
 
 
 class EventoSocialListCreateView(generics.ListCreateAPIView):

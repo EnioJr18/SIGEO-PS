@@ -6,6 +6,7 @@ import Button from '../components/ui/Button.jsx';
 import EmptyState from '../components/ui/EmptyState.jsx';
 import Input from '../components/ui/Input.jsx';
 import LoadingState from '../components/ui/LoadingState.jsx';
+import { getLinkComprovacao } from '../utils/eventos.js';
 
 const categoryOptions = [
   { value: '', label: 'Todas as causas' },
@@ -25,6 +26,7 @@ export default function Projetos({ eventos, handleParticipar, inscricoesConfirma
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const hasActiveFilters = Boolean(searchTerm.trim() || selectedCategory);
+  const linkComprovacao = getLinkComprovacao(eventoSelecionado);
 
   const filteredEventos = eventos.filter((evento) => {
     const search = searchTerm.trim().toLowerCase();
@@ -212,12 +214,12 @@ export default function Projetos({ eventos, handleParticipar, inscricoesConfirma
                     <LinkIcon aria-hidden="true" className="w-6 h-6 text-slate-500" />
                     <div>
                       <p className="text-[0.65rem] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Comprovação</p>
-                      {eventoSelecionado.link_comprovacao ? (
-                        <a href={eventoSelecionado.link_comprovacao} target="_blank" rel="noreferrer" className="font-semibold text-sm text-blue-600 hover:text-blue-800 hover:underline transition-colors line-clamp-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded">
-                          Acessar formulário
+                      {linkComprovacao ? (
+                        <a href={linkComprovacao} target="_blank" rel="noreferrer" className="font-semibold text-sm text-blue-600 hover:text-blue-800 hover:underline transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded">
+                          Acessar comprovação
                         </a>
                       ) : (
-                        <span className="font-semibold text-sm text-slate-500">Nenhum link exigido</span>
+                        <span className="font-semibold text-sm text-slate-500">Nenhum link informado</span>
                       )}
                     </div>
                   </div>

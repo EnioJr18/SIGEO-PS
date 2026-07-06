@@ -53,6 +53,7 @@ def geocode_endereco(endereco):
 
 class EventoSocialSerializer(serializers.ModelSerializer):
     endereco = serializers.CharField(required=False, allow_blank=True)
+    link_comprovacao = serializers.URLField(required=False, allow_blank=True, allow_null=True)
     latitude = serializers.FloatField(write_only=True, required=False)
     longitude = serializers.FloatField(write_only=True, required=False)
     organizador = serializers.HiddenField(default=serializers.CurrentUserDefault())
@@ -71,6 +72,7 @@ class EventoSocialSerializer(serializers.ModelSerializer):
             'data_hora',
             'localizacao',
             'endereco_texto',
+            'link_comprovacao',
             'criado_em',
             'organizador',
             'latitude',

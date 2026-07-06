@@ -9,7 +9,9 @@
 ![JWT](https://img.shields.io/badge/Auth-JWT-black)
 ![IA](https://img.shields.io/badge/IA-Gemini-8E75B2)
 
-O **SIGEO-PS** é uma plataforma web para conectar organizadores, participantes e projetos sociais usando geolocalização, inscrições, avaliação de eventos e apoio de IA. O sistema permite cadastrar iniciativas sociais, visualizá-las em mapa, participar de projetos, acompanhar inscrições e medir indicadores reais de impacto social.
+O **SIGEO-PS** é uma plataforma web para conectar organizadores, participantes e projetos sociais usando geolocalização, inscrições, avaliação de eventos, dashboard de impacto social e recursos de inteligência artificial.
+
+O sistema permite cadastrar projetos/eventos sociais, localizar iniciativas em mapa, usar autocomplete de endereço com geocoding gratuito via OpenStreetMap/Nominatim, participar de projetos, acompanhar inscrições, avaliar eventos realizados e visualizar indicadores reais de impacto social. A IA está presente no chatbot e também no cadastro de evento, ajudando o organizador a sugerir ou melhorar a descrição do projeto.
 
 Este repositório reúne **backend Django/DRF** e **frontend React/Tailwind CSS** no mesmo projeto. A aplicação foi desenvolvida como projeto acadêmico/portfólio, com funcionalidades principais implementadas e espaço claro para evolução técnica.
 
@@ -24,6 +26,7 @@ Este repositório reúne **backend Django/DRF** e **frontend React/Tailwind CSS*
 - [Como rodar o frontend](#como-rodar-o-frontend)
 - [Variáveis de ambiente](#variáveis-de-ambiente)
 - [Rotas principais da API](#rotas-principais-da-api)
+- [Geocoding e mapa](#geocoding-e-mapa)
 - [Avaliação de eventos](#avaliação-de-eventos)
 - [Impacto Social](#impacto-social)
 - [IA e Chatbot](#ia-e-chatbot)
@@ -31,7 +34,9 @@ Este repositório reúne **backend Django/DRF** e **frontend React/Tailwind CSS*
 - [Validações úteis](#validações-úteis)
 - [Status do projeto](#status-do-projeto)
 - [Próximas melhorias](#próximas-melhorias)
-- [Autor](#autor)
+- [Licença](#licença)
+- [Contribuição](#-contribuição)
+- [Autores](#-autores)
 
 ## Sobre o projeto
 
@@ -42,10 +47,12 @@ O SIGEO-PS propõe uma solução web para:
 - cadastrar e divulgar projetos sociais;
 - localizar iniciativas em mapa interativo;
 - permitir inscrição e cancelamento por participantes;
+- exibir detalhes do projeto, incluindo link de comprovação quando informado;
 - oferecer painéis separados para organizadores e participantes;
 - registrar avaliações de eventos;
 - exibir métricas reais de impacto social;
-- apoiar o usuário com um chatbot integrado à IA.
+- apoiar usuários e organizadores com IA;
+- facilitar o cadastro de local usando geocoding gratuito com Nominatim/OpenStreetMap.
 
 ## Funcionalidades
 
@@ -55,19 +62,24 @@ O SIGEO-PS propõe uma solução web para:
 - Visualizar projetos sociais disponíveis.
 - Buscar projetos por texto e filtrar por categoria.
 - Explorar projetos em mapa com geolocalização.
+- Ver detalhes de cada projeto.
+- Acessar link de comprovação quando o organizador informar esse dado.
 - Inscrever-se em projetos.
 - Cancelar inscrição.
 - Acompanhar agenda e histórico no painel do participante.
-- Avaliar eventos realizados com nota e comentário opcional.
+- Avaliar eventos com nota e comentário opcional.
 - Editar dados básicos do perfil.
 - Usar o chatbot/IA para tirar dúvidas sobre voluntariado e uso da plataforma.
 
 ### Organizador
 
 - Criar projetos sociais.
-- Editar e excluir projetos cadastrados.
+- Usar IA para sugerir ou melhorar a descrição do projeto no cadastro.
+- Cadastrar o local do projeto com autocomplete/geocoding, sem digitar coordenadas manualmente.
+- Editar projetos cadastrados.
+- Excluir projetos cadastrados.
 - Visualizar painel de gestão.
-- Acompanhar quantidade de inscritos.
+- Acompanhar eventos criados.
 - Ver lista de participantes inscritos por projeto.
 
 ### Sistema
@@ -75,10 +87,15 @@ O SIGEO-PS propõe uma solução web para:
 - Autenticação com JWT.
 - API REST com Django REST Framework.
 - Banco PostgreSQL com suporte geográfico via PostGIS.
+- Mapa interativo com Leaflet/React Leaflet.
+- Geocoding via backend usando Nominatim/OpenStreetMap.
 - Dashboard de Impacto Social com dados reais.
-- Integração com Gemini via backend.
+- Avaliações de eventos.
+- Integração com Gemini usando `google-genai`.
+- Fallback local para sugestão de descrição quando a IA externa estiver sem quota, indisponível ou retornar resposta inválida.
 - Componentes visuais reutilizáveis no frontend.
-- Modais visuais para confirmação de ações críticas, substituindo `alert()`/`confirm()` nativos.
+- Modais visuais de confirmação para ações críticas, substituindo `alert()`/`confirm()` nativos.
+- Tratamento amigável de erros e estados de carregamento/vazio.
 
 ## Tecnologias utilizadas
 
@@ -94,6 +111,7 @@ O SIGEO-PS propõe uma solução web para:
 - django-environ
 - django-cors-headers
 - WhiteNoise
+- google-genai
 
 ### Frontend
 
@@ -107,13 +125,15 @@ O SIGEO-PS propõe uma solução web para:
 ### IA
 
 - Gemini
-- Pacote `google.generativeai`
-- Endpoint próprio no backend: `POST /api/ai/chat/`
-- Configuração por variável de ambiente: `GEMINI_API_KEY`
+- SDK `google-genai`
+- Chatbot via `POST /api/ai/chat/`
+- Sugestão de descrição via `POST /api/ai/sugerir-descricao-evento/`
+- Configuração por variáveis de ambiente: `GEMINI_API_KEY` e `GEMINI_MODEL`
+- Fallback local para manter a experiência quando o serviço externo estiver indisponível
 
 ## Arquitetura geral
 
-O frontend React consome a API REST do backend Django. O backend concentra as regras de usuários, projetos sociais, inscrições, avaliações, impacto social e integração com IA. O PostgreSQL/PostGIS armazena os dados relacionais e geográficos, incluindo a localização dos projetos no mapa.
+O frontend React consome a API REST do backend Django. O backend concentra as regras de usuários, projetos sociais, inscrições, avaliações, impacto social, geocoding e integração com IA. O PostgreSQL/PostGIS armazena os dados relacionais e geográficos, incluindo a localização dos projetos no mapa.
 
 Fluxo simplificado:
 
@@ -122,7 +142,8 @@ Usuário
   -> Frontend React + Tailwind
   -> API REST Django/DRF
   -> PostgreSQL/PostGIS
-  -> Gemini API, quando o chatbot é usado
+  -> Nominatim/OpenStreetMap, quando busca endereços
+  -> Gemini, quando recursos de IA são usados
 ```
 
 ## Estrutura de pastas
@@ -131,53 +152,54 @@ Estrutura resumida do repositório:
 
 ```txt
 sigeo_backend/
-├── back/
-│   ├── apps/
-│   │   ├── ai_integration/
-│   │   │   ├── serializers.py
-│   │   │   ├── services.py
-│   │   │   ├── urls.py
-│   │   │   └── views.py
-│   │   ├── events/
-│   │   │   ├── migrations/
-│   │   │   ├── models.py
-│   │   │   ├── serializers.py
-│   │   │   ├── urls.py
-│   │   │   └── views.py
-│   │   ├── impact/
-│   │   └── users/
-│   │       ├── models.py
-│   │       ├── serializers.py
-│   │       ├── urls.py
-│   │       └── views.py
-│   ├── sigeo_core/
-│   │   ├── settings.py
-│   │   ├── urls.py
-│   │   ├── asgi.py
-│   │   └── wsgi.py
-│   ├── manage.py
-│   └── requirements.txt
-├── front_end/
-│   ├── public/
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── events/
-│   │   │   │   └── EventCard.jsx
-│   │   │   └── ui/
-│   │   │       ├── Button.jsx
-│   │   │       ├── ConfirmDialog.jsx
-│   │   │       ├── EmptyState.jsx
-│   │   │       ├── Input.jsx
-│   │   │       └── LoadingState.jsx
-│   │   ├── pages/
-│   │   ├── api.js
-│   │   ├── App.jsx
-│   │   ├── Chatbot.jsx
-│   │   └── EventMap.jsx
-│   ├── package.json
-│   └── vite.config.js
-├── README.md
-└── LICENSE
+|-- back/
+|   |-- apps/
+|   |   |-- ai_integration/
+|   |   |   |-- serializers.py
+|   |   |   |-- services.py
+|   |   |   |-- urls.py
+|   |   |   `-- views.py
+|   |   |-- events/
+|   |   |   |-- migrations/
+|   |   |   |-- models.py
+|   |   |   |-- serializers.py
+|   |   |   |-- urls.py
+|   |   |   `-- views.py
+|   |   |-- impact/
+|   |   `-- users/
+|   |       |-- models.py
+|   |       |-- serializers.py
+|   |       |-- urls.py
+|   |       `-- views.py
+|   |-- sigeo_core/
+|   |   |-- settings.py
+|   |   |-- urls.py
+|   |   |-- asgi.py
+|   |   `-- wsgi.py
+|   |-- manage.py
+|   `-- requirements.txt
+|-- front_end/
+|   |-- public/
+|   |-- src/
+|   |   |-- components/
+|   |   |   |-- events/
+|   |   |   |   `-- EventCard.jsx
+|   |   |   `-- ui/
+|   |   |       |-- Button.jsx
+|   |   |       |-- ConfirmDialog.jsx
+|   |   |       |-- EmptyState.jsx
+|   |   |       |-- Input.jsx
+|   |   |       `-- LoadingState.jsx
+|   |   |-- pages/
+|   |   |-- utils/
+|   |   |-- api.js
+|   |   |-- App.jsx
+|   |   |-- Chatbot.jsx
+|   |   `-- EventMap.jsx
+|   |-- package.json
+|   `-- vite.config.js
+|-- README.md
+`-- LICENSE
 ```
 
 ## Como rodar o backend
@@ -223,6 +245,8 @@ Atualmente, o frontend usa a constante `API_BASE` em `front_end/src/api.js`, apo
 http://localhost:8000/api
 ```
 
+Não há uso de `VITE_API_URL` no frontend atual. Essa variável pode ser uma melhoria futura para facilitar deploys em ambientes diferentes.
+
 ## Variáveis de ambiente
 
 Crie um arquivo `.env` dentro da pasta `back/` para configurar o backend.
@@ -234,6 +258,9 @@ SECRET_KEY=sua_chave_secreta_django
 DEBUG=True
 DATABASE_URL=postgres://usuario:senha@host:5432/banco?sslmode=require
 GEMINI_API_KEY=sua_chave_gemini_aqui
+GEMINI_MODEL=gemini-2.5-flash
+ALLOWED_HOSTS=localhost,127.0.0.1
+CORS_ALLOWED_ORIGINS=http://localhost:5173
 ```
 
 Variáveis relevantes:
@@ -242,9 +269,12 @@ Variáveis relevantes:
 - `DEBUG`: controla o modo de depuração.
 - `DATABASE_URL`: conexão com PostgreSQL/PostGIS.
 - `GEMINI_API_KEY`: chave usada pela integração com Gemini.
+- `GEMINI_MODEL`: modelo Gemini usado pelo serviço de IA. O projeto usa `gemini-2.5-flash` como padrão quando não houver outro valor configurado.
+- `ALLOWED_HOSTS`: hosts permitidos para o Django. No código atual está liberado de forma ampla para facilitar o MVP, mas deve ser restringido em produção.
+- `CORS_ALLOWED_ORIGINS`: origens permitidas para o frontend consumir a API.
 - `GDAL_LIBRARY_PATH` e `GEOS_LIBRARY_PATH`: opcionais, úteis em ambientes que exigem configuração manual do GeoDjango.
 
-Configurações como `ALLOWED_HOSTS` e `CORS_ALLOWED_ORIGINS` estão em `back/sigeo_core/settings.py` e devem ser revisadas conforme o ambiente de deploy.
+Importante: não versionar valores reais de `.env`, chaves Gemini, credenciais de banco ou segredos de produção.
 
 ## Rotas principais da API
 
@@ -274,6 +304,7 @@ http://localhost:8000/api
 | `GET` | `/api/eventos/<id>/` | Detalha um projeto | Público |
 | `PATCH` | `/api/eventos/<id>/` | Atualiza projeto | Protegido |
 | `DELETE` | `/api/eventos/<id>/` | Exclui projeto | Protegido |
+| `GET` | `/api/eventos/geocodificar/?q=<texto>` | Busca sugestões de endereço/local | Público |
 
 ### Inscrições
 
@@ -296,6 +327,19 @@ http://localhost:8000/api
 | Método | Rota | Descrição | Acesso |
 |---|---|---|---|
 | `POST` | `/api/ai/chat/` | Envia mensagem para o chatbot com Gemini | Público |
+| `POST` | `/api/ai/sugerir-descricao-evento/` | Sugere ou melhora a descrição de um projeto social | Protegido |
+
+## Geocoding e mapa
+
+O cadastro de projeto possui autocomplete de endereço/local. O usuário informa um texto como cidade, bairro, rua ou local conhecido, e o backend consulta o Nominatim/OpenStreetMap:
+
+```txt
+GET /api/eventos/geocodificar/?q=<texto>
+```
+
+O usuário não precisa digitar latitude e longitude manualmente. Quando uma sugestão é selecionada, o frontend envia os dados do local e o backend armazena a localização geográfica internamente.
+
+Como o Nominatim depende dos dados disponíveis no OpenStreetMap, locais muito específicos podem não aparecer. Nesses casos, o usuário pode buscar por cidade, bairro, rua próxima ou um ponto de referência mais conhecido.
 
 ## Avaliação de eventos
 
@@ -342,22 +386,21 @@ Dados exibidos no frontend:
 - participantes únicos;
 - total e média de avaliações;
 - distribuição de projetos por categoria;
-- próximos projetos cadastrados.
+- próximos projetos cadastrados;
+- gráficos simples criados com Tailwind/CSS, sem dependência extra de biblioteca de gráficos.
 
 O endpoint foi implementado para lidar com banco vazio, categorias inexistentes e média de avaliação nula sem quebrar a interface.
 
 ## IA e Chatbot
 
-O SIGEO-PS possui um chatbot conectado ao backend por meio do endpoint:
+O SIGEO-PS possui dois usos principais de IA no backend.
+
+### Chatbot
+
+Endpoint:
 
 ```txt
 POST /api/ai/chat/
-```
-
-A integração usa Gemini, configurado pela variável de ambiente:
-
-```env
-GEMINI_API_KEY=sua_chave_aqui
 ```
 
 Objetivo do chatbot:
@@ -366,6 +409,32 @@ Objetivo do chatbot:
 - orientar o usuário sobre como usar a plataforma;
 - apoiar a descoberta de projetos sociais;
 - responder de forma breve e amigável dentro do contexto do SIGEO-PS.
+
+### Sugestão de descrição de projeto
+
+Endpoint:
+
+```txt
+POST /api/ai/sugerir-descricao-evento/
+```
+
+Uso no frontend:
+
+- aparece no formulário de criação/edição de projeto;
+- permite sugerir uma descrição quando o campo está vazio;
+- permite melhorar a descrição quando já existe texto;
+- mostra a sugestão em um card;
+- o organizador pode usar ou descartar a sugestão;
+- o cadastro do projeto continua funcionando mesmo se a IA falhar.
+
+Configuração:
+
+```env
+GEMINI_API_KEY=sua_chave_aqui
+GEMINI_MODEL=gemini-2.5-flash
+```
+
+A IA externa não deve ser tratada como sempre disponível. Quando o Gemini estiver sem quota, indisponível ou retornar uma resposta vazia/inválida, o backend tenta entregar uma sugestão básica local para preservar a experiência do usuário.
 
 ## Interface e UX
 
@@ -386,6 +455,7 @@ Pontos implementados:
   - `ConfirmDialog`;
 - botão de mostrar/ocultar senha em Login e Cadastro;
 - modal visual para ações críticas;
+- link de comprovação exibido nos modais quando informado;
 - estados de carregamento, vazio e erro;
 - responsividade para mobile, tablet e desktop;
 - acessibilidade básica com labels, aria-labels, foco visível e semântica de modal.
@@ -417,7 +487,15 @@ python manage.py makemigrations
 python manage.py migrate
 ```
 
-Antes de rodar `migrate`, confira se o banco configurado é o ambiente correto.
+Testes automatizados:
+
+```powershell
+cd back
+.\.venv\Scripts\activate
+python manage.py test
+```
+
+Os testes devem ser ampliados conforme o projeto evoluir. Antes de rodar `migrate`, confira se o banco configurado é o ambiente correto.
 
 ## Status do projeto
 
@@ -429,16 +507,18 @@ O sistema ainda não deve ser tratado como uma solução final 100% pronta para 
 
 Possíveis evoluções:
 
-- testes automatizados mais completos;
+- testes automatizados mais amplos;
 - documentação Swagger/OpenAPI;
-- deploy completo e documentado;
-- variáveis de ambiente no frontend para configurar a URL da API;
+- deploy final e monitoramento;
+- variável de ambiente no frontend para configurar a URL da API;
 - gráficos mais avançados no módulo de Impacto Social;
+- cache e melhorias de performance;
+- melhorias adicionais de acessibilidade;
 - filtros avançados no mapa;
 - recomendações mais inteligentes com IA;
 - notificações para participantes e organizadores;
 - painel administrativo mais completo;
-- otimização de performance e code splitting no frontend.
+- otimização de performance e code splitting para reduzir o chunk principal do Vite.
 
 ## Licença
 

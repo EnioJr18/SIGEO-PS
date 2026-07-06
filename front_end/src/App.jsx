@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { Home as HomeIcon, Menu, Sparkles, X } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { Home as HomeIcon, Menu, Sparkles, UserRound, X } from "lucide-react";
 import { Routes, Route, useNavigate } from "react-router-dom"; 
 
 import "./App.css";
@@ -53,6 +53,20 @@ export default function App() {
   const [loginSuccess, setLoginSuccess] = useState("");
   const [registerError, setRegisterError] = useState("");
   const [registerSuccess, setRegisterSuccess] = useState("");
+  const displayName = userName || "Usuário";
+  const firstName = displayName.trim().split(/\s+/)[0] || "Usuário";
+
+  const refreshEventos = useCallback(async (filters = {}) => {
+    try {
+      setIsLoadingEventos(true);
+      const data = await listEventos(filters);
+      setEventos(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error("Erro ao buscar projetos:", error);
+    } finally {
+      setIsLoadingEventos(false);
+    }
+  }, []);
 
   // ==========================================
   // EFEITOS (CARREGAMENTO INICIAL)
@@ -66,19 +80,27 @@ export default function App() {
   }, [isAuthenticated]);
 
   useEffect(() => {
-    const fetchEventos = async () => {
-      try {
-        setIsLoadingEventos(true);
-        const data = await listEventos(); 
-        setEventos(Array.isArray(data) ? data : []);
-      } catch (error) {
-        console.error("Erro ao buscar projetos:", error);
-      } finally {
-        setIsLoadingEventos(false);
-      }
+    const syncUserFromStorage = () => {
+      setUserName(localStorage.getItem("userName") || "");
+      setUserRole(localStorage.getItem("userRole") || "");
     };
-    fetchEventos();
+
+    window.addEventListener("storage", syncUserFromStorage);
+    window.addEventListener("sigeo:profile-updated", syncUserFromStorage);
+
+    return () => {
+      window.removeEventListener("storage", syncUserFromStorage);
+      window.removeEventListener("sigeo:profile-updated", syncUserFromStorage);
+    };
   }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      refreshEventos();
+    }, 0);
+
+    return () => clearTimeout(timer);
+  }, [refreshEventos]);
 
   useEffect(() => {
     if (toastMessage) {
@@ -94,29 +116,21 @@ export default function App() {
 
   const handleCategoryFilter = async (categoria) => {
     try {
-      setIsLoadingEventos(true);
       const paramCategoria = (categoria === 'todas' || categoria === 'Todos') ? '' : categoria;
-      const data = await listEventos({ categoria: paramCategoria });
-      setEventos(Array.isArray(data) ? data : []);
+      await refreshEventos({ categoria: paramCategoria });
       setTimeout(() => document.getElementById('eventos')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
     } catch (error) {
       console.error("Erro ao filtrar projetos:", error);
-    } finally {
-      setIsLoadingEventos(false);
     }
   };
 
   const handleSearch = async (event) => {
     if (event) event.preventDefault();
     try {
-      setIsLoadingEventos(true);
-      const data = await listEventos({ search: searchValue });
-      setEventos(Array.isArray(data) ? data : []);
+      await refreshEventos({ search: searchValue });
       setTimeout(() => document.getElementById('eventos')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
     } catch (error) {
       console.error("Erro ao buscar projetos:", error);
-    } finally {
-      setIsLoadingEventos(false);
     }
   };
 
@@ -137,6 +151,7 @@ export default function App() {
       }
       const atualizadas = await getMinhasInscricoes();
       setInscricoesConfirmadas(Array.isArray(atualizadas) ? atualizadas : []);
+      await refreshEventos();
     } catch (error) {
       setToastMessage(error.message || "Erro ao processar sua solicitação.");
     }
@@ -212,6 +227,22 @@ export default function App() {
           </button>
 
           <div className="flex items-center gap-2 sm:gap-4">
+            {isAuthenticated && (
+              <div className="hidden md:flex items-center gap-3 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-sm shadow-sm">
+                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-200">
+                  <UserRound aria-hidden="true" className="h-4 w-4" />
+                </span>
+                <span className="max-w-32 truncate font-semibold text-slate-100">
+                  Olá, {firstName}
+                </span>
+                {userRole && (
+                  <span className="rounded-full bg-slate-800 px-2 py-0.5 text-xs font-bold text-slate-300">
+                    {userRole}
+                  </span>
+                )}
+              </div>
+            )}
+
             <button onClick={() => navigate("/criar-evento")} className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-full text-sm font-bold shadow-md transition-all flex items-center justify-center whitespace-nowrap">
               <span className="hidden sm:inline">Cadastrar projeto</span>
               <span className="sm:hidden">+ Criar</span>
@@ -276,14 +307,14 @@ export default function App() {
           <Route path="/dashboard" element={<DashboardImpacto />} />
           
           {/* Rotas de Organização e Participação */}
-          <Route path="/painel" element={<PainelOrganizador eventos={eventos} />} />
+          <Route path="/painel" element={<PainelOrganizador eventos={eventos} onEventosChanged={refreshEventos} />} />
           <Route path="/painel/lista/:id" element={<ListaInscritos />} />
           <Route path="/agenda" element={<PainelParticipante />} />
           <Route path="/perfil" element={<Perfil />} />
           
-          <Route path="/criar-evento" element={<CriarEvento />} />
-          <Route path="/cadastrar-evento" element={<CriarEvento />} />
-          <Route path="/editar-evento/:id" element={<CriarEvento />} />
+          <Route path="/criar-evento" element={<CriarEvento onEventoSaved={refreshEventos} />} />
+          <Route path="/cadastrar-evento" element={<CriarEvento onEventoSaved={refreshEventos} />} />
+          <Route path="/editar-evento/:id" element={<CriarEvento onEventoSaved={refreshEventos} />} />
           
           <Route path="/login" element={<Login onSubmit={handleLogin} loginError={loginError} loginSuccess={loginSuccess} />} />
           <Route path="/cadastro" element={<Cadastro onSubmit={handleRegister} registerError={registerError} registerSuccess={registerSuccess} />} />

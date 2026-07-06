@@ -164,7 +164,7 @@ function EventMap({ eventos, isLoading, apiError, onViewDetails, onParticipar, i
                   aria-label={`Ver detalhes de ${evento.titulo}`}
                   onClick={(e) => { 
                     e.stopPropagation(); 
-                    if (onViewDetails) onViewDetails(evento.id, evento.titulo); 
+                    if (onViewDetails) onViewDetails(evento); 
                   }}
                 >
                   Ver detalhes
@@ -239,7 +239,7 @@ function EventMap({ eventos, isLoading, apiError, onViewDetails, onParticipar, i
                         aria-label={`Ver detalhes de ${titulo}`}
                         onClick={(e) => { 
                           e.stopPropagation(); 
-                          if (onViewDetails) onViewDetails(evento.id, titulo); 
+                          if (onViewDetails) onViewDetails(evento); 
                         }}
                       >
                         Ver detalhes

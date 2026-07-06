@@ -1,13 +1,23 @@
 import { useEffect, useRef, useState } from 'react'
+import { geocodificarEndereco } from './api'
 
 function AddressAutocomplete({ value, onChange, onSelect, placeholder = 'Rua, Bairro, Cidade, Estado' }) {
   const [suggestions, setSuggestions] = useState([])
   const [isOpen, setIsOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [searchError, setSearchError] = useState('')
   const requestIdRef = useRef(0)
+  const cacheRef = useRef(new Map())
+  const skipNextSearchRef = useRef(false)
 
   useEffect(() => {
     const query = value.trim()
+    const normalizedQuery = query.toLowerCase()
+
+    if (skipNextSearchRef.current) {
+      skipNextSearchRef.current = false
+      return undefined
+    }
 
     if (query.length < 3) {
       return undefined
@@ -16,16 +26,19 @@ function AddressAutocomplete({ value, onChange, onSelect, placeholder = 'Rua, Ba
     const timeoutId = setTimeout(async () => {
       const requestId = requestIdRef.current + 1
       requestIdRef.current = requestId
+
+      if (cacheRef.current.has(normalizedQuery)) {
+        setSuggestions(cacheRef.current.get(normalizedQuery))
+        setSearchError('')
+        setIsLoading(false)
+        return
+      }
+
       setIsLoading(true)
+      setSearchError('')
 
       try {
-        const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&limit=5&countrycodes=br&q=${encodeURIComponent(query)}`
-        const response = await fetch(url, {
-          headers: {
-            'Accept-Language': 'pt-BR',
-          },
-        })
-        const data = await response.json()
+        const data = await geocodificarEndereco(query)
 
         if (requestIdRef.current !== requestId) {
           return
@@ -35,39 +48,44 @@ function AddressAutocomplete({ value, onChange, onSelect, placeholder = 'Rua, Ba
           ? data
               .map((item) => ({
                 id: item.place_id,
-                label: item.display_name || item.name || '',
-                latitude: Number(item.lat),
-                longitude: Number(item.lon),
+                label: item.label || item.display_name || item.name || '',
+                latitude: Number(item.latitude ?? item.lat),
+                longitude: Number(item.longitude ?? item.lon),
               }))
               .filter((item) => item.label && Number.isFinite(item.latitude) && Number.isFinite(item.longitude))
           : []
 
+        cacheRef.current.set(normalizedQuery, normalizedSuggestions)
         setSuggestions(normalizedSuggestions)
-      } catch {
+      } catch (error) {
         if (requestIdRef.current === requestId) {
           setSuggestions([])
+          setSearchError(error.message || 'Não foi possível buscar endereços agora.')
         }
       } finally {
         if (requestIdRef.current === requestId) {
           setIsLoading(false)
         }
       }
-    }, 300)
+    }, 500)
 
     return () => clearTimeout(timeoutId)
   }, [value])
 
   const handleSelect = (suggestion) => {
+    skipNextSearchRef.current = true
     onChange(suggestion.label)
     onSelect?.(suggestion)
     setSuggestions([])
+    setSearchError('')
+    setIsLoading(false)
     setIsOpen(false)
   }
 
   const query = value.trim()
   const visibleSuggestions = query.length >= 3 ? suggestions : []
   const showSuggestions = isOpen && visibleSuggestions.length > 0
-  const showEmptyState = isOpen && !isLoading && query.length >= 3 && visibleSuggestions.length === 0
+  const showEmptyState = isOpen && !isLoading && !searchError && query.length >= 3 && visibleSuggestions.length === 0
 
   return (
     <div className="address-autocomplete">
@@ -78,7 +96,12 @@ function AddressAutocomplete({ value, onChange, onSelect, placeholder = 'Rua, Ba
           aria-label="Buscar endereço do projeto"
           value={value}
           onChange={(event) => {
-            onChange(event.target.value)
+            const nextValue = event.target.value
+            onChange(nextValue)
+            if (nextValue.trim().length < 3) {
+              setSuggestions([])
+              setSearchError('')
+            }
             setIsOpen(true)
           }}
           onFocus={() => setIsOpen(true)}
@@ -108,7 +131,12 @@ function AddressAutocomplete({ value, onChange, onSelect, placeholder = 'Rua, Ba
         </ul>
       )}
 
-      {showEmptyState && <small className="form-note">Nenhum endereço encontrado. Tente informar bairro, cidade e estado.</small>}
+      {searchError && <small className="form-note" role="alert">{searchError}</small>}
+      {showEmptyState && (
+        <small className="form-note">
+          Nenhum endereço encontrado. Tente buscar por cidade, bairro ou rua próxima. Alguns pontos de referência podem não estar cadastrados no mapa. Exemplo: São Miguel dos Campos, AL.
+        </small>
+      )}
     </div>
   )
 }
