@@ -79,3 +79,37 @@ class Inscricao(models.Model):
 
     def __str__(self):
         return f"{self.participante.username} -> {self.evento.titulo} ({self.status})"
+
+
+class AvaliacaoEvento(models.Model):
+    evento = models.ForeignKey(
+        EventoSocial,
+        on_delete=models.CASCADE,
+        related_name='avaliacoes',
+    )
+    participante = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='avaliacoes_eventos',
+    )
+    nota = models.PositiveSmallIntegerField()
+    comentario = models.TextField(blank=True)
+    criado_em = models.DateTimeField(auto_now_add=True)
+    atualizado_em = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['evento', 'participante'],
+                name='unique_avaliacao_por_participante_evento',
+            ),
+            models.CheckConstraint(
+                condition=models.Q(nota__gte=1) & models.Q(nota__lte=5),
+                name='avaliacao_nota_entre_1_e_5',
+            ),
+        ]
+        verbose_name = 'Avaliação de Evento'
+        verbose_name_plural = 'Avaliações de Eventos'
+
+    def __str__(self):
+        return f"{self.participante.username} avaliou {self.evento.titulo}: {self.nota}"

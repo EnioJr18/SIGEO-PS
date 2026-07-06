@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AlertTriangle, CheckCircle, Home } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Eye, EyeOff, Home } from 'lucide-react';
 import Button from '../components/ui/Button.jsx';
 import Input from '../components/ui/Input.jsx';
 
 export default function Login({ onSubmit, loginError, loginSuccess }) {
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
@@ -49,12 +50,26 @@ export default function Login({ onSubmit, loginError, loginSuccess }) {
           
           <Input
             label="Senha"
-            type="password"
+            type={showPassword ? 'text' : 'password'}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Digite sua senha"
             autoComplete="current-password"
             required
+            rightAction={(
+              <button
+                type="button"
+                onClick={() => setShowPassword((current) => !current)}
+                className="rounded-lg p-1 text-slate-400 transition-colors hover:text-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+                aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+              >
+                {showPassword ? (
+                  <EyeOff aria-hidden="true" className="h-5 w-5" />
+                ) : (
+                  <Eye aria-hidden="true" className="h-5 w-5" />
+                )}
+              </button>
+            )}
           />
 
           {/* Feedbacks de Erro e Sucesso */}

@@ -5,7 +5,7 @@ from urllib.request import Request, urlopen
 
 from django.contrib.gis.geos import Point
 from rest_framework import serializers
-from .models import EventoSocial, Inscricao
+from .models import AvaliacaoEvento, EventoSocial, Inscricao
 
 
 def geocode_endereco(endereco):
@@ -166,3 +166,17 @@ class InscricaoSerializer(serializers.ModelSerializer):
 
         validated_data['status'] = novo_status
         return super().create(validated_data)
+
+
+class AvaliacaoEventoSerializer(serializers.ModelSerializer):
+    participante = serializers.HiddenField(default=serializers.CurrentUserDefault())
+
+    class Meta:
+        model = AvaliacaoEvento
+        fields = ['id', 'evento', 'participante', 'nota', 'comentario', 'criado_em', 'atualizado_em']
+        read_only_fields = ['id', 'evento', 'criado_em', 'atualizado_em']
+
+    def validate_nota(self, value):
+        if value < 1 or value > 5:
+            raise serializers.ValidationError('A nota deve estar entre 1 e 5.')
+        return value

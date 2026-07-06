@@ -190,6 +190,17 @@ export async function sendChatMessage(message) {
   });
 }
 
+export async function avaliarEvento(eventoId, payload) {
+  return request(`/eventos/${eventoId}/avaliar/`, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function getImpactoSocial() {
+  return request('/eventos/impacto-social/');
+}
+
 // Função para o Organizador deletar seu próprio evento
 export const deleteEvento = async (eventoId) => {
   await request(`/eventos/${eventoId}/`, {

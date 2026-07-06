@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { AlertTriangle, CheckCircle, ShieldCheck, UserRound } from 'lucide-react';
 import { getPerfil, updatePerfil, deletePerfil } from '../api';
 import Button from '../components/ui/Button.jsx';
+import ConfirmDialog from '../components/ui/ConfirmDialog.jsx';
 import Input from '../components/ui/Input.jsx';
 import LoadingState from '../components/ui/LoadingState.jsx';
 
@@ -9,6 +10,8 @@ export default function Perfil() {
   const [loading, setLoading] = useState(true);
   const [mensagem, setMensagem] = useState({ tipo: '', texto: '' });
   const [perfil, setPerfil] = useState({ first_name: '', email: '' });
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
 
   const carregarDados = async () => {
     try {
@@ -51,19 +54,17 @@ export default function Perfil() {
   };
 
   const handleExcluirConta = async () => {
-    const confirmacao = window.confirm(
-      "Tem certeza absoluta? Essa ação apagará todos os seus dados e não pode ser desfeita."
-    );
-    if (confirmacao) {
-      try {
-        await deletePerfil();
-        // Limpa a memória e joga pra fora do sistema
-        localStorage.clear();
-        alert("Conta excluída. Esperamos ver você de novo no futuro!");
-        window.location.assign('/'); 
-      } catch {
-        setMensagem({ tipo: 'erro', texto: 'Erro ao tentar excluir a conta.' });
-      }
+    setIsDeletingAccount(true);
+
+    try {
+      await deletePerfil();
+      localStorage.clear();
+      window.location.assign('/'); 
+    } catch {
+      setMensagem({ tipo: 'erro', texto: 'Erro ao tentar excluir a conta.' });
+      setConfirmDeleteOpen(false);
+    } finally {
+      setIsDeletingAccount(false);
     }
   };
 
@@ -146,7 +147,7 @@ export default function Perfil() {
             <Button
               variant="danger"
               size="lg"
-              onClick={handleExcluirConta}
+              onClick={() => setConfirmDeleteOpen(true)}
               className="w-full sm:w-auto"
             >
               Excluir minha conta permanentemente
@@ -155,6 +156,17 @@ export default function Perfil() {
         </div>
 
       </div>
+      <ConfirmDialog
+        open={confirmDeleteOpen}
+        title="Excluir conta permanentemente?"
+        description="Todos os seus dados, inscrições e histórico serão apagados. Essa ação não pode ser desfeita."
+        confirmLabel="Excluir minha conta"
+        cancelLabel="Manter conta"
+        variant="danger"
+        isLoading={isDeletingAccount}
+        onCancel={() => setConfirmDeleteOpen(false)}
+        onConfirm={handleExcluirConta}
+      />
     </div>
   );
 }

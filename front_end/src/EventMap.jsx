@@ -64,6 +64,7 @@ function EventMap({ eventos, isLoading, apiError, onViewDetails, onParticipar, i
   const [selectedEventId, setSelectedEventId] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [bottomSheetOpen, setBottomSheetOpen] = useState(true);
+  const [mapNotice, setMapNotice] = useState('');
 
   const safeEvents = useMemo(() => {
     const dataHoje = new Date();
@@ -108,11 +109,12 @@ function EventMap({ eventos, isLoading, apiError, onViewDetails, onParticipar, i
           const coords = [pos.coords.latitude, pos.coords.longitude];
           setUserLocation(coords);
           setMapCenter(coords);
+          setMapNotice('');
         },
-        () => alert('Acesso ao GPS negado. Toque no mapa para marcar.')
+        () => setMapNotice('Acesso ao GPS negado. Toque no mapa para marcar sua posição.')
       );
     } else {
-      alert('Navegador não suporta GPS.');
+      setMapNotice('Este navegador não oferece suporte à geolocalização.');
     }
   };
 
@@ -197,6 +199,7 @@ function EventMap({ eventos, isLoading, apiError, onViewDetails, onParticipar, i
         <div className="sheet-content">
           {isLoading && <p className="sheet-msg">Carregando projetos...</p>}
           {apiError && <p className="sheet-msg text-danger">Erro ao carregar projetos.</p>}
+          {mapNotice && <p className="sheet-msg">{mapNotice}</p>}
           
           <div className="sheet-list">
             {filteredEvents.map(evento => {

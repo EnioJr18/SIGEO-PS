@@ -1,157 +1,183 @@
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, BarChart3, CalendarDays, ClipboardList, Star, Users } from 'lucide-react';
+import { getImpactoSocial } from '../api';
+import Button from '../components/ui/Button.jsx';
+import EmptyState from '../components/ui/EmptyState.jsx';
+import LoadingState from '../components/ui/LoadingState.jsx';
+
+const categoryLabels = {
+  saude: 'Saúde',
+  educacao: 'Educação',
+  cultura: 'Cultura',
+  esporte: 'Esporte',
+  assistencia_social: 'Assistência Social',
+  meio_ambiente: 'Meio Ambiente',
+  tecnologia: 'Tecnologia',
+  causa_animal: 'Causa Animal',
+  outro: 'Outro',
+};
+
+function MetricCard({ icon: Icon, label, value, tone = 'emerald', helper }) {
+  const toneClass = {
+    emerald: 'bg-emerald-50 text-emerald-700',
+    blue: 'bg-blue-50 text-blue-700',
+    amber: 'bg-amber-50 text-amber-700',
+    slate: 'bg-slate-100 text-slate-700',
+  }[tone];
+
+  return (
+    <div className="rounded-3xl border border-slate-100 bg-white p-6 shadow-sm transition-shadow hover:shadow-md">
+      <div className="mb-5 flex items-center justify-between gap-4">
+        <span className="text-xs font-bold uppercase tracking-wider text-slate-500">{label}</span>
+        <div className={`flex h-11 w-11 items-center justify-center rounded-2xl ${toneClass}`}>
+          <Icon aria-hidden="true" className="h-5 w-5" />
+        </div>
+      </div>
+      <p className="text-4xl font-extrabold text-slate-900">{value}</p>
+      {helper && <p className="mt-2 text-sm font-medium text-slate-500">{helper}</p>}
+    </div>
+  );
+}
 
 export default function DashboardImpacto() {
   const navigate = useNavigate();
+  const [data, setData] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    let mounted = true;
+
+    getImpactoSocial()
+      .then((payload) => {
+        if (mounted) setData(payload);
+      })
+      .catch((err) => {
+        if (mounted) setError(err.message || 'Não foi possível carregar os dados de impacto.');
+      })
+      .finally(() => {
+        if (mounted) setIsLoading(false);
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const categorias = data?.categorias || [];
+  const proximosEventos = data?.proximos_eventos || [];
+  const hasAnyData = data && (
+    data.total_projetos > 0 ||
+    data.total_inscricoes_confirmadas > 0 ||
+    categorias.length > 0
+  );
 
   return (
-    <div className="min-h-screen bg-slate-50 py-16">
-      <div className="container mx-auto px-4 max-w-6xl">
-        
-        {/* Cabeçalho do Dashboard */}
-        <div className="text-center mb-12">
-          <h1 className="text-3xl md:text-5xl font-extrabold text-slate-900 tracking-tight mb-4">
-            Módulo de Impacto Social
+    <div className="min-h-screen bg-slate-50 py-12 md:py-16">
+      <div className="container mx-auto max-w-6xl px-4">
+        <div className="mb-10 rounded-3xl bg-gradient-to-r from-slate-900 to-blue-900 p-6 text-white shadow-lg md:p-8">
+          <span className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-bold text-blue-100">
+            <BarChart3 aria-hidden="true" className="h-4 w-4" />
+            Dados reais do sistema
+          </span>
+          <h1 className="mb-2 text-3xl font-extrabold tracking-tight md:text-5xl">
+            Impacto Social
           </h1>
-          <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-            Visão geral do engajamento e transformação nas comunidades (Visão Estratégica)
+          <p className="max-w-2xl text-lg text-blue-100">
+            Visão geral de projetos, inscrições, participantes e avaliações registradas no SIGEO-PS.
           </p>
         </div>
 
-        {/* Cartões de Métricas Principais */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-          
-          {/* Card 1: Voluntários */}
-          <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100 relative overflow-hidden group hover:shadow-md transition-shadow">
-            <div className="absolute top-0 left-0 w-1.5 h-full bg-blue-500"></div>
-            <h3 className="text-slate-500 font-bold uppercase tracking-wider text-xs mb-2">Voluntários Ativos</h3>
-            <p className="text-4xl font-extrabold text-slate-900 mb-2">1.248</p>
-            <div className="flex items-center gap-1.5 text-sm font-semibold text-emerald-600 bg-emerald-50 w-fit px-2.5 py-1 rounded-full">
-              <span>↑</span> 12% este mês
+        {isLoading ? (
+          <LoadingState text="Carregando dados de impacto..." />
+        ) : error ? (
+          <EmptyState
+            icon={BarChart3}
+            title="Não foi possível carregar o impacto"
+            description={error}
+          />
+        ) : !hasAnyData ? (
+          <EmptyState
+            icon={ClipboardList}
+            title="Ainda não há dados de impacto"
+            description="Quando projetos e inscrições forem registrados, os indicadores aparecerão aqui."
+          />
+        ) : (
+          <>
+            <div className="mb-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+              <MetricCard icon={ClipboardList} label="Projetos sociais" value={data.total_projetos} tone="emerald" />
+              <MetricCard icon={Users} label="Inscrições confirmadas" value={data.total_inscricoes_confirmadas} tone="blue" />
+              <MetricCard icon={Users} label="Participantes únicos" value={data.participantes_unicos} tone="slate" />
+              <MetricCard
+                icon={Star}
+                label="Avaliação média"
+                value={data.media_avaliacao ?? '-'}
+                tone="amber"
+                helper={`${data.total_avaliacoes || 0} avaliações`}
+              />
             </div>
-          </div>
 
-          {/* Card 2: Ações */}
-          <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100 relative overflow-hidden group hover:shadow-md transition-shadow">
-            <div className="absolute top-0 left-0 w-1.5 h-full bg-emerald-500"></div>
-            <h3 className="text-slate-500 font-bold uppercase tracking-wider text-xs mb-2">Ações Concluídas</h3>
-            <p className="text-4xl font-extrabold text-slate-900 mb-2">342</p>
-            <div className="flex items-center gap-1.5 text-sm font-semibold text-emerald-600 bg-emerald-50 w-fit px-2.5 py-1 rounded-full">
-              <span>↑</span> 8% este mês
+            <div className="mb-10 grid grid-cols-1 gap-8 lg:grid-cols-2">
+              <section className="rounded-3xl border border-slate-100 bg-white p-6 shadow-sm md:p-8">
+                <h2 className="mb-6 flex items-center gap-3 text-2xl font-bold text-slate-900">
+                  <BarChart3 aria-hidden="true" className="h-6 w-6 text-blue-600" />
+                  Distribuição por categoria
+                </h2>
+                {categorias.length === 0 ? (
+                  <p className="text-sm text-slate-500">Nenhuma categoria registrada ainda.</p>
+                ) : (
+                  <div className="space-y-5">
+                    {categorias.map((item) => (
+                      <div key={item.categoria}>
+                        <div className="mb-2 flex items-end justify-between gap-3">
+                          <span className="font-bold text-slate-700">
+                            {categoryLabels[item.categoria] || item.categoria}
+                          </span>
+                          <span className="text-sm font-bold text-slate-400">{item.total} projetos</span>
+                        </div>
+                        <div className="h-3 overflow-hidden rounded-full bg-slate-100">
+                          <div
+                            className="h-full rounded-full bg-blue-500"
+                            style={{ width: `${Math.max(item.percentual, 8)}%` }}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </section>
+
+              <section className="rounded-3xl border border-slate-100 bg-white p-6 shadow-sm md:p-8">
+                <h2 className="mb-6 flex items-center gap-3 text-2xl font-bold text-slate-900">
+                  <CalendarDays aria-hidden="true" className="h-6 w-6 text-emerald-600" />
+                  Próximos projetos
+                </h2>
+                {proximosEventos.length === 0 ? (
+                  <p className="text-sm text-slate-500">Nenhum projeto futuro publicado no momento.</p>
+                ) : (
+                  <div className="space-y-3">
+                    {proximosEventos.map((evento) => (
+                      <div key={evento.id} className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
+                        <p className="font-extrabold text-slate-800">{evento.titulo}</p>
+                        <p className="mt-1 text-sm text-slate-500">
+                          {new Date(evento.data_hora).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </section>
             </div>
-          </div>
+          </>
+        )}
 
-          {/* Card 3: Vidas */}
-          <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100 relative overflow-hidden group hover:shadow-md transition-shadow">
-            <div className="absolute top-0 left-0 w-1.5 h-full bg-violet-500"></div>
-            <h3 className="text-slate-500 font-bold uppercase tracking-wider text-xs mb-2">Vidas Impactadas (Est.)</h3>
-            <p className="text-4xl font-extrabold text-slate-900 mb-2">+15k</p>
-            <div className="flex items-center gap-1.5 text-sm font-medium text-slate-400">
-              Baseado em relatórios
-            </div>
-          </div>
-
-        </div>
-
-        {/* Seção de Rankings e Gráficos */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-          
-          {/* Ranking de Cidades */}
-          <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
-            <h2 className="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-3">
-              <span className="text-3xl" aria-hidden="true">🏆</span> 
-              Ranking Cidades Solidárias
-            </h2>
-            
-            <div className="flex flex-col gap-4">
-              <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100 hover:border-slate-200 transition-colors">
-                <div className="flex items-center gap-4">
-                  <span className="text-3xl drop-shadow-sm">🥇</span>
-                  <span className="font-extrabold text-slate-800 text-lg">Maceió</span>
-                </div>
-                <span className="bg-blue-100 text-blue-800 px-4 py-1.5 rounded-full text-sm font-bold shadow-sm">
-                  84 eventos
-                </span>
-              </div>
-
-              <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100 hover:border-slate-200 transition-colors">
-                <div className="flex items-center gap-4">
-                  <span className="text-3xl drop-shadow-sm">🥈</span>
-                  <span className="font-extrabold text-slate-800 text-lg">Arapiraca</span>
-                </div>
-                <span className="bg-blue-100 text-blue-800 px-4 py-1.5 rounded-full text-sm font-bold shadow-sm">
-                  56 eventos
-                </span>
-              </div>
-
-              <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100 hover:border-slate-200 transition-colors">
-                <div className="flex items-center gap-4">
-                  <span className="text-3xl drop-shadow-sm">🥉</span>
-                  <span className="font-extrabold text-slate-800 text-lg">São Miguel dos Campos</span>
-                </div>
-                <span className="bg-blue-100 text-blue-800 px-4 py-1.5 rounded-full text-sm font-bold shadow-sm">
-                  42 eventos
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Categorias Mais Atendidas */}
-          <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
-            <h2 className="text-2xl font-bold text-slate-900 mb-8 flex items-center gap-3">
-              <span className="text-3xl" aria-hidden="true">📊</span> 
-              Categorias em Destaque
-            </h2>
-            
-            <div className="flex flex-col gap-8">
-              {/* Educação */}
-              <div>
-                <div className="flex justify-between items-end mb-2">
-                  <span className="font-bold text-slate-700">Educação</span>
-                  <span className="font-bold text-slate-400 text-sm">45%</span>
-                </div>
-                <div className="w-full bg-slate-100 rounded-full h-3 overflow-hidden shadow-inner">
-                  <div className="bg-blue-500 h-full rounded-full transition-all duration-1000 ease-out" style={{ width: '45%' }}></div>
-                </div>
-              </div>
-
-              {/* Assistência Social */}
-              <div>
-                <div className="flex justify-between items-end mb-2">
-                  <span className="font-bold text-slate-700">Assistência Social</span>
-                  <span className="font-bold text-slate-400 text-sm">30%</span>
-                </div>
-                <div className="w-full bg-slate-100 rounded-full h-3 overflow-hidden shadow-inner">
-                  <div className="bg-orange-500 h-full rounded-full transition-all duration-1000 ease-out" style={{ width: '30%' }}></div>
-                </div>
-              </div>
-
-              {/* Saúde */}
-              <div>
-                <div className="flex justify-between items-end mb-2">
-                  <span className="font-bold text-slate-700">Saúde</span>
-                  <span className="font-bold text-slate-400 text-sm">15%</span>
-                </div>
-                <div className="w-full bg-slate-100 rounded-full h-3 overflow-hidden shadow-inner">
-                  <div className="bg-red-500 h-full rounded-full transition-all duration-1000 ease-out" style={{ width: '15%' }}></div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-        </div>
-        
-        {/* Ação de Voltar */}
         <div className="text-center">
-          <button 
-            onClick={() => navigate('/')}
-            className="inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 px-8 rounded-full shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all"
-          >
-            <ArrowLeft aria-hidden="true" className="w-5 h-5" />
-            Voltar para o Início
-          </button>
+          <Button onClick={() => navigate('/')} variant="ghost" size="lg" className="bg-slate-900 text-white hover:bg-slate-800">
+            <ArrowLeft aria-hidden="true" className="h-5 w-5" />
+            Voltar para o início
+          </Button>
         </div>
-
       </div>
     </div>
   );

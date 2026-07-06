@@ -3,11 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import { ClipboardList, Edit3, Plus, Trash2, Users } from 'lucide-react';
 import { getInscricoesRecebidas, deleteEvento } from '../api';
 import Button from '../components/ui/Button.jsx';
+import ConfirmDialog from '../components/ui/ConfirmDialog.jsx';
 import EmptyState from '../components/ui/EmptyState.jsx';
 import LoadingState from '../components/ui/LoadingState.jsx';
 
 export default function PainelOrganizador({ eventos }) {
   const [inscricoes, setInscricoes] = useState(null);
+  const [eventoParaExcluir, setEventoParaExcluir] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [erroAcao, setErroAcao] = useState('');
   const navigate = useNavigate();
 
   // Verifica se tem token.
@@ -45,18 +49,20 @@ export default function PainelOrganizador({ eventos }) {
   const totalProjetos = Object.keys(contagemPorEvento).length;
   const totalInscritos = inscricoes.length;
 
-  // Lógica de Exclusão Segura
-  const handleExcluir = async (eventoId, titulo) => {
-    const confirmacao = window.confirm(`ATENÇÃO: Tem certeza que deseja excluir o projeto "${titulo}"?\nEssa ação não tem volta e apagará todas as inscrições.`);
-    
-    if (confirmacao) {
-      try {
-        await deleteEvento(eventoId);
-        // Recarrega a página de forma rápida para atualizar tudo
-        window.location.reload();
-      } catch (error) {
-        alert(error.message || "Não foi possível excluir o evento.");
-      }
+  const handleConfirmarExclusao = async () => {
+    if (!eventoParaExcluir) return;
+
+    setIsDeleting(true);
+    setErroAcao('');
+
+    try {
+      await deleteEvento(eventoParaExcluir.id);
+      window.location.reload();
+    } catch (error) {
+      setErroAcao(error.message || "Não foi possível excluir o projeto.");
+      setEventoParaExcluir(null);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -113,6 +119,12 @@ export default function PainelOrganizador({ eventos }) {
             </button>
           </div>
         </div>
+
+        {erroAcao && (
+          <div className="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-medium text-red-600" role="alert">
+            {erroAcao}
+          </div>
+        )}
 
         {/* Estado Vazio (Sem projetos ainda) */}
         {Object.keys(contagemPorEvento).length === 0 ? (
@@ -185,7 +197,7 @@ export default function PainelOrganizador({ eventos }) {
                         Editar
                       </Button>
                       <Button
-                        onClick={() => handleExcluir(eventoId, titulo)}
+                        onClick={() => setEventoParaExcluir({ id: eventoId, titulo })}
                         variant="secondary"
                         size="sm"
                         className="border-red-200 hover:bg-red-50 text-red-600"
@@ -203,6 +215,17 @@ export default function PainelOrganizador({ eventos }) {
         )}
 
       </div>
+      <ConfirmDialog
+        open={Boolean(eventoParaExcluir)}
+        title="Excluir projeto?"
+        description="Essa ação removerá o projeto e pode afetar inscrições vinculadas."
+        confirmLabel="Excluir projeto"
+        cancelLabel="Voltar"
+        variant="danger"
+        isLoading={isDeleting}
+        onCancel={() => setEventoParaExcluir(null)}
+        onConfirm={handleConfirmarExclusao}
+      />
     </div>
   );
 }

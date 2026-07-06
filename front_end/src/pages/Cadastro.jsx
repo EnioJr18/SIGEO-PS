@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AlertTriangle, CheckCircle } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Eye, EyeOff } from 'lucide-react';
 import Button from '../components/ui/Button.jsx';
 import Input from '../components/ui/Input.jsx';
 
@@ -16,6 +16,8 @@ export default function Cadastro({ onSubmit, registerError, registerSuccess }) {
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [localError, setLocalError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleChange = (event) => {
     let { name, value } = event.target;
@@ -100,23 +102,51 @@ export default function Cadastro({ onSubmit, registerError, registerSuccess }) {
             <Input
               label="Senha"
               name="password"
-              type="password"
+              type={showPassword ? 'text' : 'password'}
               value={form.password}
               onChange={handleChange}
               required
               placeholder="Crie uma senha"
               minLength="6"
+              rightAction={(
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((current) => !current)}
+                  className="rounded-lg p-1 text-slate-400 transition-colors hover:text-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+                  aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                >
+                  {showPassword ? (
+                    <EyeOff aria-hidden="true" className="h-5 w-5" />
+                  ) : (
+                    <Eye aria-hidden="true" className="h-5 w-5" />
+                  )}
+                </button>
+              )}
             />
             
             <Input
               label="Confirmar senha"
               name="confirmPassword"
-              type="password"
+              type={showConfirmPassword ? 'text' : 'password'}
               value={form.confirmPassword}
               onChange={handleChange}
               required
               placeholder="Repita a senha"
               minLength="6"
+              rightAction={(
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword((current) => !current)}
+                  className="rounded-lg p-1 text-slate-400 transition-colors hover:text-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+                  aria-label={showConfirmPassword ? 'Ocultar confirmação de senha' : 'Mostrar confirmação de senha'}
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff aria-hidden="true" className="h-5 w-5" />
+                  ) : (
+                    <Eye aria-hidden="true" className="h-5 w-5" />
+                  )}
+                </button>
+              )}
             />
           </div>
 

@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { AlertTriangle, Calendar, CalendarDays, CalendarX, CheckCircle, Clock3, History, Settings, Sprout, Star } from 'lucide-react';
-import { cancelarInscricao, getPerfil, updatePerfil, deletePerfil, getMinhasInscricoes } from '../api';
+import { avaliarEvento, cancelarInscricao, getPerfil, updatePerfil, deletePerfil, getMinhasInscricoes } from '../api';
 import Button from '../components/ui/Button.jsx';
+import ConfirmDialog from '../components/ui/ConfirmDialog.jsx';
 import EmptyState from '../components/ui/EmptyState.jsx';
 import Input from '../components/ui/Input.jsx';
 import LoadingState from '../components/ui/LoadingState.jsx';
@@ -29,6 +30,13 @@ export default function PainelParticipante() {
   const [activeTab, setActiveTab] = useState('agenda');
   const [loading, setLoading] = useState(true);
   const [mensagem, setMensagem] = useState({ tipo: '', texto: '' });
+  const [confirmDialog, setConfirmDialog] = useState(null);
+  const [isConfirmingAction, setIsConfirmingAction] = useState(false);
+  const [avaliacaoEvento, setAvaliacaoEvento] = useState(null);
+  const [nota, setNota] = useState(5);
+  const [comentario, setComentario] = useState('');
+  const [isSubmittingAvaliacao, setIsSubmittingAvaliacao] = useState(false);
+  const [avaliacoesEnviadas, setAvaliacoesEnviadas] = useState(() => new Set());
 
   // Estados dos dados
   const [perfil, setPerfil] = useState({ first_name: '', email: '' });
@@ -93,20 +101,25 @@ export default function PainelParticipante() {
   };
 
   const handleExcluirConta = async () => {
-    const confirmacao = window.confirm(
-      "Tem certeza absoluta? Essa ação apagará seu histórico de impacto e não pode ser desfeita."
-    );
-    if (confirmacao) {
+    setConfirmDialog({
+      title: 'Excluir conta permanentemente?',
+      description: 'Todos os seus dados, inscrições e histórico serão apagados. Essa ação não pode ser desfeita.',
+      confirmLabel: 'Excluir minha conta',
+      cancelLabel: 'Manter conta',
+      onConfirm: async () => {
+        setIsConfirmingAction(true);
       try {
         await deletePerfil();
-        // Limpa o token do navegador (ajuste a chave do localStorage se você usar outro nome)
-        localStorage.removeItem('token'); 
-        alert("Conta excluída. Esperamos ver você de novo no futuro!");
-        navigate('/'); // Joga o usuário de volta para a Home
+        localStorage.clear();
+        navigate('/');
       } catch {
         setMensagem({ tipo: 'erro', texto: 'Erro ao tentar excluir a conta.' });
+        setConfirmDialog(null);
+      } finally {
+        setIsConfirmingAction(false);
       }
-    }
+      },
+    });
   };
 
   useEffect(() => {
@@ -115,15 +128,68 @@ export default function PainelParticipante() {
   }, []);
 
   const handleCancelarInscricao = async (inscricao) => {
-    const confirmacao = window.confirm("Tem certeza que deseja cancelar esta inscrição?");
-    if (!confirmacao) return;
+    setConfirmDialog({
+      title: 'Cancelar inscrição?',
+      description: 'Você deixará de participar deste projeto. Essa ação pode ser refeita se ainda houver vagas.',
+      confirmLabel: 'Sim, cancelar',
+      cancelLabel: 'Voltar',
+      onConfirm: async () => {
+        setIsConfirmingAction(true);
 
     try {
       await cancelarInscricao(inscricao.evento);
       setMensagem({ tipo: 'sucesso', texto: 'Inscrição cancelada com sucesso.' });
+          setConfirmDialog(null);
       await carregarDados();
     } catch (error) {
       setMensagem({ tipo: 'erro', texto: error.message || 'Erro ao cancelar inscrição.' });
+          setConfirmDialog(null);
+        } finally {
+          setIsConfirmingAction(false);
+        }
+      },
+    });
+  };
+
+  const abrirModalAvaliacao = (inscricao) => {
+    setAvaliacaoEvento(inscricao);
+    setNota(5);
+    setComentario('');
+    setMensagem({ tipo: '', texto: '' });
+  };
+
+  const fecharModalAvaliacao = () => {
+    if (isSubmittingAvaliacao) return;
+    setAvaliacaoEvento(null);
+    setComentario('');
+    setNota(5);
+  };
+
+  const handleEnviarAvaliacao = async (event) => {
+    event.preventDefault();
+    if (!avaliacaoEvento) return;
+
+    setIsSubmittingAvaliacao(true);
+    setMensagem({ tipo: '', texto: '' });
+
+    try {
+      await avaliarEvento(avaliacaoEvento.evento, {
+        nota,
+        comentario,
+      });
+      setAvaliacoesEnviadas((current) => {
+        const next = new Set(current);
+        next.add(avaliacaoEvento.evento);
+        return next;
+      });
+      setMensagem({ tipo: 'sucesso', texto: 'Avaliação enviada com sucesso.' });
+      setAvaliacaoEvento(null);
+      setComentario('');
+      setNota(5);
+    } catch (error) {
+      setMensagem({ tipo: 'erro', texto: error.message || 'Não foi possível enviar sua avaliação.' });
+    } finally {
+      setIsSubmittingAvaliacao(false);
     }
   };
 
@@ -283,10 +349,15 @@ export default function PainelParticipante() {
                     <h3 className="text-lg font-bold text-slate-800">{insc.evento_titulo}</h3>
                     <p className="text-slate-500 mt-1">Realizado em: {new Date(insc.evento_data).toLocaleDateString('pt-BR')}</p>
                   </div>
-                  {/* Botão de avaliar (que implementaremos no futuro) */}
-                  <Button type="button" variant="secondary" className="bg-amber-100 text-amber-700 hover:bg-amber-200 border-amber-100">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    className="bg-amber-100 text-amber-700 hover:bg-amber-200 border-amber-100"
+                    onClick={() => abrirModalAvaliacao(insc)}
+                    disabled={avaliacoesEnviadas.has(insc.evento)}
+                  >
                     <Star aria-hidden="true" className="w-4 h-4" />
-                    Avaliar Evento
+                    {avaliacoesEnviadas.has(insc.evento) ? 'Avaliado' : 'Avaliar evento'}
                   </Button>
                 </div>
               ))
@@ -347,6 +418,79 @@ export default function PainelParticipante() {
         )}
 
       </div>
+      <ConfirmDialog
+        open={Boolean(confirmDialog)}
+        title={confirmDialog?.title}
+        description={confirmDialog?.description}
+        confirmLabel={confirmDialog?.confirmLabel}
+        cancelLabel={confirmDialog?.cancelLabel}
+        variant="danger"
+        isLoading={isConfirmingAction}
+        onCancel={() => setConfirmDialog(null)}
+        onConfirm={() => confirmDialog?.onConfirm()}
+      />
+
+      {avaliacaoEvento && (
+        <div className="fixed inset-0 z-[300] flex items-center justify-center bg-slate-950/70 px-4 py-6 backdrop-blur-sm">
+          <div className="w-full max-w-lg rounded-3xl border border-slate-200 bg-white shadow-2xl" role="dialog" aria-modal="true" aria-labelledby="avaliacao-evento-titulo">
+            <div className="border-b border-slate-100 p-6">
+              <h2 id="avaliacao-evento-titulo" className="text-2xl font-extrabold text-slate-900">
+                Avaliar evento
+              </h2>
+              <p className="mt-2 text-sm text-slate-500">
+                Conte como foi sua experiência em {avaliacaoEvento.evento_titulo}.
+              </p>
+            </div>
+
+            <form onSubmit={handleEnviarAvaliacao} className="space-y-6 p-6">
+              <div>
+                <span className="block text-sm font-bold text-slate-700 mb-3">Nota</span>
+                <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Nota do evento">
+                  {[1, 2, 3, 4, 5].map((value) => (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => setNota(value)}
+                      className={`inline-flex h-11 w-11 items-center justify-center rounded-full border font-extrabold transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 ${
+                        nota === value
+                          ? 'border-amber-400 bg-amber-100 text-amber-700 shadow-sm'
+                          : 'border-slate-200 bg-slate-50 text-slate-500 hover:border-amber-300'
+                      }`}
+                      role="radio"
+                      aria-checked={nota === value}
+                    >
+                      {value}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label htmlFor="comentario-avaliacao" className="block text-sm font-bold text-slate-700 mb-2">
+                  Comentário opcional
+                </label>
+                <textarea
+                  id="comentario-avaliacao"
+                  value={comentario}
+                  onChange={(event) => setComentario(event.target.value)}
+                  rows="4"
+                  placeholder="Compartilhe um comentário breve sobre o projeto."
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-700 placeholder-slate-400 outline-none transition-all focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500"
+                />
+              </div>
+
+              <div className="flex flex-col-reverse gap-3 border-t border-slate-100 pt-5 sm:flex-row sm:justify-end">
+                <Button type="button" variant="ghost" onClick={fecharModalAvaliacao} disabled={isSubmittingAvaliacao}>
+                  Cancelar
+                </Button>
+                <Button type="submit" disabled={isSubmittingAvaliacao}>
+                  {isSubmittingAvaliacao ? 'Enviando...' : 'Enviar avaliação'}
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
