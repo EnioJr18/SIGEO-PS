@@ -1,4 +1,6 @@
-export const API_BASE = 'http://localhost:8000/api';
+export const API_BASE = (
+  import.meta.env.VITE_API_URL || 'http://localhost:8000/api'
+).replace(/\/$/, '');
 
 function getAuthToken() {
   return (
